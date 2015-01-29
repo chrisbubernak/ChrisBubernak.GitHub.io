@@ -20,7 +20,7 @@ disqus_shortname:
 
 # Social icons
 show_social_icons: false
-github_username:
+github_username: chrisbubernak
 stackoverflow_id:
 twitter_username:
 google_plus_id:
@@ -31,7 +31,7 @@ flattr_button:
 
 # Build settings
 markdown:     kramdown
-highlighter: rouge
+#highlighter: rouge
 redcarpet:
   extensions: ['smart', 'tables', 'with_toc_data']
 permalink:    pretty
