@@ -1,64 +1,42 @@
-# SITE CONFIGURATION
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://bubernak.com" # the base hostname & protocol for your site
+# Site settings
+title:       Chris Bubernak
+email:       chris.bubernak@gmail.com
+author:      Chris Bubernak
+description: "My blog."
+baseurl:     ""
+url:         "http://bubernak.com"
 
-# THEME-SPECIFIC CONFIGURATION
-theme:
-  # Meta
-  title: Chris Bubernak
-  avatar: avatar.png
-  gravatar: # email md5 hash
-  description: "A website with blog posts, and pages." # used by search engines
-  
-  # Header and footer text
-  header_text: 
-  footer_text: >
-   Powered by <a href="http://jekyllrb.com">Jekyll</a> with <a href="https://rohanchandra.github.io/project/type.html">Type Theme</a>
-  
-  # Icons
-  rss: false
-  email_address: chris.bubernak@gmail.com
-  behance:
-  bitbucket: 
-  dribbble: 
-  facebook: 
-  flickr: 
-  github: "chrisbubernak"
-  google_plus: 
-  instagram: 
-  linkedin:  # full URL
-  pinterest: 
-  reddit: 
-  soundcloud: 
-  stack_exchange:  # full URL
-  steam: 
-  tumblr: 
-  twitter: "chrisbubernak"
-  wordpress: 
-  youtube: 
-  
-  # Scripts
-  google_analytics: # tracking id, e.g. "UA-000000-01"
-  disqus_shortname:
-  
-  # Localization strings
-  str_follow_on: "Follow on"
-  str_rss_follow: "Follow RSS feed"
-  str_email: "Email"
-  str_next: "Next"
-  str_prev: "Prev"
-  str_continue_reading: "Continue reading"
-  
-  # Colors, typography and padding
-  # Open the "_sass > base" folder, and open "_variables.scss"
+# Google analytics
+google_analytics:
 
-# PAGINATION
-paginate: 5
-paginate_path: "blog/page:num"
+# Optional features
+animated:           false
+show_related_posts: false
+show_post_footers:  false
 
-# BUILD SETTINGS
-markdown: kramdown
+# Disqus post comments
+# (leave blank to disable Disqus)
+disqus_shortname:
+
+# Social icons
+show_social_icons: false
+github_username:
+stackoverflow_id:
+twitter_username:
+google_plus_id:
+linkedin_username:
+bitcoin_url:
+paypal_url:
+flattr_button:
+
+# Build settings
+markdown:     kramdown
 highlighter: rouge
+redcarpet:
+  extensions: ['smart', 'tables', 'with_toc_data']
+permalink:    pretty
+paginate:     3
 sass:
-  sass_dir: _sass
-  style: :compressed
+  compressed: true
+gems:
+  - jekyll-sitemap
