@@ -25,7 +25,7 @@ At this point we have a candidate set of sides, to check if it truly is a right 
 
 What this looks like in code:
 
-```python
+{% highlight python %}
 def getSolutions(p):
   ret = 0;
   for i in range(2, p):
@@ -34,7 +34,7 @@ def getSolutions(p):
       if k * k == (i * i + j * j):
         ret = ret + 1;
   return ret;
-```
+{% endhighlight %}
 
 As you can see here I've made one subtle change to the algorithm discussed above which is to force _j_ to be no larger than _i_. I do this to prevent the algorithm from rediscovering duplicate solutions in which the values of _i_ and _j_ are just reversed. 
 
@@ -42,7 +42,7 @@ On the surface this algorithm doesn't look too bad. Given a value _p_ we can in 
 
 Unfortunately, we are ignoring half of the problem which is that in our main method we have to try all values of _p_ up to _1000_. This means that our actual running team is _O(n^3)_ and no longer something that we can expect to run efficiently for inputs of size _1000_. 
 
-```python
+{% highlight python %}
 def solve(n):
   best = 0;
   ret = 0;
@@ -52,7 +52,7 @@ def solve(n):
       best = s;
       ret = i;
   return ret;
-```
+{% endhighlight %}
 
 When I time this solution it takes about 35 sec. Ouch. Fortunately, there are a few minor tweaks we can make to get some drastic improvement. 
 
@@ -60,10 +60,10 @@ When I time this solution it takes about 35 sec. Ouch. Fortunately, there are a 
 
 First off we can make use of the simple fact that _k > i_ and _k > j_ as _k_ is the hypotenuse in our right triangle. If we add the following code inside our nested loop we can get the running time immediately down to 10 sec!
 
-```python
+{% highlight python %}
 if i > k or j > k:
   break;
-```
+{% endhighlight %}
 
 Now, asymptotically, our running time is still _O(n^3)_ but we've drastically reduced the amount of time we will spend looking for candidate solutions by terminating the inner loop when we know we can't find any more solutions.
 
@@ -90,13 +90,13 @@ _b = (p^2 - 2pa)/(2p - 2a)_
 
 Now we have an equation for _b_, dependent on two variables _p_ and _a_. What this means is that, we can rewrite _getSolutions(p)_ function to have a single loop and simply iterate over all values of _a_. Then, we can check if, given _p_ and _a_, there exists an integer _b_ that satisfies the equation.
 
-```python
+{% highlight python %}
 def getSolutions(p):
     ret = 0;
     for a in range(1, p):
         if (p * p - 2 * p * a) % (2 * p - 2 * a) == 0:
             ret = ret + 1;
     return ret;
-```
+{% endhighlight %}
 
 Our algorithm is now _O(n^2)_ and runs blazingly fast (about _.2_ sec on my laptop). We can add some further optimizations to make this even faster but for now I'll leave that as an exercise to the reader. A link to my final solution can be found [here](https://github.com/chrisbubernak/ProjectEulerChallenges/blob/master/39_IntegerRightTriangles.py).
