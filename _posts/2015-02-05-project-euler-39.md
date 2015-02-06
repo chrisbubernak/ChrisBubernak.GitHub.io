@@ -40,7 +40,7 @@ As you can see here I've made one subtle change to the algorithm discussed above
 
 On the surface this algorithm doesn't look too bad. Given a value _p_ we can in _O(n^2)_ calculate the number of solutions. If our input values are capped at _1000_ this should give us a solution almost instantly.
 
-Unfortunately, we are ignoring half of the problem which is that in our main method we have to try all values of _p_ up to _1000_. This means that our actual running team is _O(n^3)_ and no longer something that we can expect to run efficiently for inputs of size _1000_. 
+Unfortunately, we are ignoring half of the problem which is that in our main method we have to try all values of _p_ up to _1000_. This means that our actual running time is _O(n^3)_ and no longer something that we can expect to run efficiently for inputs of size _1000_. 
 
 {% highlight python %}
 def solve(n):
