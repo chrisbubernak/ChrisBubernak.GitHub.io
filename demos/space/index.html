@@ -31,9 +31,14 @@
             var GUN_LENGTH = 15; 
             var TEXT_COLOR = "white";
             var MAX_SHIELD_CHARGE = 100;
-            var STARTING_X = 25;
-            var STARTING_Y = 50;
-
+            var STARTING_X = 50;
+            var STARTING_Y = 200;
+            var SHIELD_BAR_WIDTH = 150;
+            var SHIELD_BAR_HEIGHT = 20;
+            var SHIELD_BAR_X_OFFSET = 55;
+            var SHIELD_BAR_Y_OFFSET = 40;
+            var KILLS_X_OFFSET = 30;
+            var KILLS_Y_OFFSET = 57;
 
             var kills;
             var mouseX;
@@ -131,14 +136,14 @@
                 ctx.lineTo(player.x + player.width/2 + gunX, player.y + player.height/2 + gunY);
                 ctx.stroke();
 
-                // draw shield
-                ctx.fillStyle = "lightblue";
-                ctx.fillRect(50, 10, shieldCharge/MAX_SHIELD_CHARGE * 150, 20);
+                // draw shield bar
+                ctx.fillStyle = SHIELD_COLOR;
+                ctx.fillRect(SHIELD_BAR_X_OFFSET, SHIELD_BAR_Y_OFFSET, shieldCharge/MAX_SHIELD_CHARGE * SHIELD_BAR_WIDTH, SHIELD_BAR_HEIGHT);
 
                 // draw score
                 ctx.fillStyle = TEXT_COLOR;
                 ctx.font = "25px Arial";
-                ctx.fillText(kills , 20, 27);
+                ctx.fillText(kills , KILLS_X_OFFSET, KILLS_Y_OFFSET);
             }
 
 
@@ -305,19 +310,8 @@
             }
 
             function special() {
-                // do something cooler here
-                var bullet = {};
-                bullet.width = BULLET_WIDTH * 10;
-                bullet.height = BULLET_HEIGHT * 10;
-                bullet.x = player.x + player.width/2 - bullet.width/2;
-                bullet.y = player.y + player.height/2 - bullet.height/2;
-                var dX = bullet.x - mouseX;
-                var dY = bullet.y - mouseY;
-                var mag = Math.sqrt(dX*dX + dY * dY);
-                bullet.vy = (-dY/mag) * BULLET_SPEED;
-                bullet.vx = (-dX/mag) * BULLET_SPEED;
-                bullet.isEnemy = false;
-                bullets.push(bullet);
+                // todo: do something cool here!
+                console.log('do something cool!')
             }
 
             function enemyShoot(enemy) {
