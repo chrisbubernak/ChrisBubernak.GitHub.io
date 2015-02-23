@@ -1,3 +1,9 @@
+---
+layout: 
+title: Space Demo
+permalink: /space/
+---
+
 <html>
     <head>
     </head>
@@ -5,7 +11,7 @@
         <canvas id="canvas">
 
         </canvas>
-        <img id="space" src="space.png" style="display:none;"/>
+        <img id="space" src="/images/space/space.png" style="display:none;"/>
         <div style="color: white; position: absolute; bottom: 10px; right: 10px;">
         Move: W, A, S, D <br> Aim: Mouse <br> Shoot: Left Click <br> Shield: Q
         </div>
@@ -16,8 +22,6 @@
             var BULLET_WIDTH = 3;
             var BULLET_HEIGHT = 3;
             var BULLET_SPEED = 6;
-            var GAME_HEIGHT = window.innerHeight;
-            var GAME_WIDTH = window.innerWidth;
             var ENEMY_COLOR = "red";
             var BACKGROUND_COLOR = "black";
             var PLAYER_COLOR = "green";
@@ -43,19 +47,20 @@
             var KILLS_X_OFFSET = 30;
             var KILLS_Y_OFFSET = 57;
 
+            var gameHeight = window.innerHeight;
+            var gameWidth = window.innerWidth;
             var kills;
             var mouseX;
             var mouseY;
             var bullets;
             var enemies;
             var player;
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext("2d");
             var img = document.getElementById("space");
             var hit;
             var shieldCharge;
             var timer;
-
-            document.getElementById('canvas').height = GAME_HEIGHT;
-            document.getElementById('canvas').width = GAME_WIDTH;
             
             start();
 
@@ -69,6 +74,9 @@
                 hit = false;
                 shieldCharge = MAX_SHIELD_CHARGE;
                 timer = setInterval(run, 1000/FPS);
+
+                canvas.width = gameWidth;
+                canvas.height = gameHeight;
             }
 
             function end() {
@@ -83,18 +91,22 @@
             }
 
             function draw() {
-                var canvas = document.getElementById('canvas');
-                var ctx = canvas.getContext("2d");
-                ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                // update canvas size (window size could have changed!)
+                gameHeight = window.innerHeight;
+                gameWidth = window.innerWidth;
+                canvas.width = gameWidth;
+                canvas.height = gameHeight;
+
+                ctx.clearRect(0, 0, gameWidth, gameHeight);
 
                 if (hit) {
                     ctx.fillStyle = HIT_COLOR;
-                    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                    ctx.fillRect(0, 0, gameWidth, gameHeight);
                     end();
                 }
 
                 // draw the background
-                ctx.drawImage(img, 0,0, GAME_WIDTH, GAME_HEIGHT);        
+                ctx.drawImage(img, 0,0, gameWidth, gameHeight);        
 
                 // draw the bullets
                 for (var b = 0; b < bullets.length; b++) {
@@ -209,7 +221,7 @@
                     var bullet = bullets[b];            
                     bullet.x += bullet.vx;
                     bullet.y += bullet.vy;
-                    if (bullet.x > GAME_WIDTH || bullet.x < 0 || bullet.y > GAME_HEIGHT || bullet.y < 0) {
+                    if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
                         bullets.splice(b, 1);
                     }
 
@@ -264,8 +276,8 @@
 
             function moveDown() {
                 player.y += player.speed;
-                if (player.y > GAME_HEIGHT - player.height) {
-                    player.y = GAME_HEIGHT - player.height;
+                if (player.y > gameHeight - player.height) {
+                    player.y = gameHeight - player.height;
                 }
             }
 
@@ -278,8 +290,8 @@
 
             function moveRight() {
                 player.x += player.speed;
-                if (player.x > GAME_WIDTH - player.width) {
-                    player.x = GAME_WIDTH - player.width;
+                if (player.x > gameWidth - player.width) {
+                    player.x = gameWidth - player.width;
                 }
             }
 
@@ -335,8 +347,8 @@
 
             function addEnemy() {
                 var enemy = {};
-                enemy.x = GAME_WIDTH - ENEMY_HEIGHT;
-                enemy.y = (GAME_HEIGHT - ENEMY_HEIGHT) * Math.random();
+                enemy.x = gameWidth - ENEMY_HEIGHT;
+                enemy.y = (gameHeight - ENEMY_HEIGHT) * Math.random();
                 enemy.width = ENEMY_WIDTH;
                 enemy.height = ENEMY_HEIGHT;
                 enemy.direction = "left";
