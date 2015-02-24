@@ -11,9 +11,11 @@ permalink: /space/
         <canvas id="canvas">
 
         </canvas>
+        <div id="startMenu" style="display:none; position: absolute; width: 10%; left: 45%; top: 50%; color: white; z-index: 1; border: solid 1px #fff; text-align: center; padding: 2px 2px 2px 2px; font-size: 20px; border-radius: 5px; font-family:helvetica;" onclick="start();"> Play Again
+        </div>
         <img id="space" src="/images/space/space.png" style="display:none;"/>
-        <div style="color: white; position: absolute; bottom: 10px; right: 10px;">
-        Move: W, A, S, D <br> Aim: Mouse <br> Shoot: Left Click <br> Shield: Q
+        <div style="color: white; position: absolute; bottom: 10px; right: 10px; font-family:helvetica;">
+        Move: W, A, S, D <br> Aim: Mouse <br> Shoot: Left Click <br> Shield: Space
         </div>
         <script>
             var ENEMY_WIDTH = 15;
@@ -28,7 +30,6 @@ permalink: /space/
             var BULLET_COLOR = "white";
             var PLAYER_BULLET_COLOR = "yellow";
             var LASER_COLOR = "red";
-            var HIT_COLOR = "red";
             var SHIELD_COLOR = "lightblue";
             var SHIELD_RADIUS = 20;
             var FPS = 60;
@@ -46,6 +47,9 @@ permalink: /space/
             var SHIELD_BAR_Y_OFFSET = 40;
             var KILLS_X_OFFSET = 30;
             var KILLS_Y_OFFSET = 57;
+            var CHANCE_ADD_ENEMY = .95;
+            var CHANCE_ENEMY_SHOOT = .99;
+
 
             var gameHeight = window.innerHeight;
             var gameWidth = window.innerWidth;
@@ -58,13 +62,15 @@ permalink: /space/
             var canvas = document.getElementById('canvas');
             var ctx = canvas.getContext("2d");
             var img = document.getElementById("space");
+            var startMenu = document.getElementById("startMenu");
             var hit;
             var shieldCharge;
             var timer;
-            
+
             start();
 
             function start() {
+                hideStartMenu();
                 kills = 0;
                 mouseX = 0;
                 mouseY = 0;
@@ -81,7 +87,7 @@ permalink: /space/
 
             function end() {
                 clearInterval(timer);
-                start();
+                showStartMenu();
             }
 
 
@@ -99,14 +105,12 @@ permalink: /space/
 
                 ctx.clearRect(0, 0, gameWidth, gameHeight);
 
+                // draw the background
+                ctx.drawImage(img, 0,0, gameWidth, gameHeight);      
+
                 if (hit) {
-                    ctx.fillStyle = HIT_COLOR;
-                    ctx.fillRect(0, 0, gameWidth, gameHeight);
                     end();
                 }
-
-                // draw the background
-                ctx.drawImage(img, 0,0, gameWidth, gameHeight);        
 
                 // draw the bullets
                 for (var b = 0; b < bullets.length; b++) {
@@ -210,7 +214,7 @@ permalink: /space/
                 if (Key.isDown(Key.DOWN)) moveDown();
                 if (Key.isDown(Key.RIGHT)) moveRight();
 
-                if (Math.random() > .95) {
+                if (Math.random() > CHANCE_ADD_ENEMY) {
                     addEnemy();
                 }
 
@@ -253,7 +257,7 @@ permalink: /space/
                         }
                     } 
 
-                    if (Math.random() > .99) {
+                    if (Math.random() > CHANCE_ENEMY_SHOOT) {
                         enemyShoot(enemy);
                     }
 
@@ -381,6 +385,16 @@ permalink: /space/
                 return {radius: SHIELD_RADIUS, x: player.x + player.width/2, y: player.y + player.height/2};
             }
 
+
+            function showStartMenu() {
+                startMenu.style.display = "block";
+            }
+
+            function hideStartMenu() {
+                startMenu.style.display = "none";
+            }
+
+
             var Key = {
                 _pressed: {},
 
@@ -389,7 +403,7 @@ permalink: /space/
                 RIGHT: 68, //d
                 DOWN: 83, //s
                 SPECIAL: 69, //e
-                SHIELD: 81, //q
+                SHIELD: 32, //space
 
                 isDown: function (keyCode) {
                     return this._pressed[keyCode];
