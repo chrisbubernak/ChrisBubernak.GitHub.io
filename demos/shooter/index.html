@@ -11,9 +11,9 @@
             width: 10%; 
             left: 45%; 
             top: 50%; 
-            color: white; 
+            color: black; 
             z-index: 1; 
-            border: solid 1px #fff; 
+            border: solid 1px #000; 
             text-align: center; 
             padding: 2px 2px 2px 2px; 
             font-size: 20px; 
@@ -53,26 +53,26 @@
                 // consts
                 var NUM_COLS = 20;
                 var NUM_ROWS = 20;
-                var ENEMY_WIDTH = 15;
-                var ENEMY_HEIGHT = 15;
+                var ENEMY_WIDTH = .75;
+                var ENEMY_HEIGHT = 1.5;
                 var ENEMY_SPEED = 3;
-                var BULLET_WIDTH = 3;
-                var BULLET_HEIGHT = 3;
+                var BULLET_WIDTH = .1;
+                var BULLET_HEIGHT = .1;
                 var BULLET_SPEED = 6;
                 var ENEMY_COLOR = "red";
                 var BACKGROUND_COLOR = "black";
                 var PLAYER_COLOR = "green";
-                var BULLET_COLOR = "white";
+                var BULLET_COLOR = "blue";
                 var PLAYER_BULLET_COLOR = "red";
                 var LASER_COLOR = "red";
                 var SHIELD_COLOR = "lightblue";
                 var SHIELD_RADIUS = 20;
                 var FPS = 60;
-                var PLAYER_WIDTH = 15;
-                var PLAYER_HEIGHT = 50;
+                var PLAYER_WIDTH = .75;
+                var PLAYER_HEIGHT = 1.5;
                 var PLAYER_SPEED = 3;
                 var GUN_LENGTH = 15; 
-                var TEXT_COLOR = "white";
+                var TEXT_COLOR = "black";
                 var MAX_SHIELD_CHARGE = 100;
                 var STARTING_X = 50;
                 var STARTING_Y = 200;
@@ -88,12 +88,12 @@
                 var MASS = 1;
                 var FRICTION = .5;
                 var MAX_SPEED = 10;
-                var GUN_HEIGHT = 10;
-                var GUN_LENGTH = 20;
 
                 // globals
                 var gameHeight = window.innerHeight;
                 var gameWidth = window.innerWidth;
+                var boxWidth = gameWidth / NUM_COLS;
+                var boxHeight = gameHeight / NUM_ROWS;
                 var kills;
                 var mouseX;
                 var mouseY;
@@ -106,13 +106,39 @@
                 var hit;
                 var shieldCharge;
                 var timer;
-                var platforms = [340,341,342, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
+                var platforms = [340, 341, 342, 324, 306, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
                 // setup event listeners
                 document.onmousemove = mouseMove;
                 document.onmouseup = shoot;
                 window.addEventListener('keyup', function (event) { Key.onKeyup(event); }, false);
                 window.addEventListener('keydown', function (event) { Key.onKeydown(event); }, false);
                 document.getElementById('startMenu').onclick = function() { start(); };
+
+                var Person = {
+                    x: STARTING_X,
+                    y: STARTING_Y,
+                    width: PLAYER_WIDTH,
+                    height: PLAYER_HEIGHT,
+                    speed: PLAYER_SPEED,
+                    vX: 0,
+                    vY: 0,
+                    aX: 0,
+                    aY: GRAVITY,
+                    mass: MASS,
+                    jumping: false,
+                    crouching: false,
+                    bounce: false,
+                    Width: function() {  
+                        return boxWidth * this.width;
+                    }, 
+                    Height: function() {
+                        if (this.crouching) {
+                            return boxHeight * this.height / 2;
+                        } 
+                        return boxHeight * this.height;
+                    }
+
+                };                
 
                 // start the game!
                 start();
@@ -124,10 +150,10 @@
                     mouseY = 0;
                     bullets = [];
                     enemies = [];
-                    gun = {x1: 0, x2: 0, x3: 0, y1: 0, y2: 0, y3: 0};
-                    player = {x: STARTING_X, y: STARTING_Y, direction: "right", width: PLAYER_WIDTH, height: PLAYER_HEIGHT, speed: PLAYER_SPEED, vX: 0, vY: 0, aX: 0, aY: GRAVITY, mass: MASS, jumping: false, gun:gun};
                     hit = false;
-                    shieldCharge = MAX_SHIELD_CHARGE;
+                    player = Object.create(Person);
+                    player.gun = {};
+                    addEnemy();
                     timer = setInterval(run, 1000/FPS);
 
                     canvas.width = gameWidth;
@@ -149,22 +175,30 @@
                     // update canvas size (window size could have changed!)
                     gameHeight = window.innerHeight;
                     gameWidth = window.innerWidth;
+                    boxWidth = gameWidth / NUM_COLS;
+                    boxHeight = gameHeight / NUM_ROWS;
                     canvas.width = gameWidth;
                     canvas.height = gameHeight;
-
                     ctx.clearRect(0, 0, gameWidth, gameHeight);    
 
                     //drawGrid();
 
+                    drawPlatforms();
+
+                    drawBullets();
+
+                    drawEnemies();
+
+                    drawPerson(player, PLAYER_COLOR);
+                }
+
+                function drawPlatforms() { 
                     for (var p = 0; p < platforms.length; p++) {
                         drawPlatform(platforms[p]);
                     }
+                }
 
-                    if (hit) {
-                        end();
-                    }
-
-                    // draw the bullets
+                function drawBullets() {
                     for (var b = 0; b < bullets.length; b++) {
                         var bullet = bullets[b];
                         if (bullet.isEnemy) {
@@ -172,29 +206,16 @@
                         } else {
                             ctx.fillStyle = PLAYER_BULLET_COLOR;
                         }
-                        ctx.fillRect(bullet.x + bullet.width/2, bullet.y + bullet.height/2, bullet.width, bullet.height);
+                        ctx.fillRect(bullet.x + bullet.Width()/2, bullet.y + bullet.Height()/2, bullet.Width(), bullet.Height());
                     }
+                }
 
-                    // draw the enemies
+
+                function drawEnemies() {
                     for (var e = 0; e < enemies.length; e++) {
                         var enemy = enemies[e];
-                        drawPerson(ctx, enemy, ENEMY_COLOR);
+                        drawPerson(enemy, ENEMY_COLOR);
                     }
-
-                    // draw the shield
-                    if (Key.isDown(Key.SHIELD) && shieldCharge > 0) {
-                        shieldCharge--;
-                        ctx.beginPath();
-                        ctx.strokeStyle = SHIELD_COLOR;
-                        ctx.arc(player.x + player.width/2, player.y + player.height/2, SHIELD_RADIUS, 0, 2 * Math.PI, false);
-                        ctx.stroke();
-                        ctx.closePath();
-                    } else if (!Key.isDown(Key.SHIELD) && shieldCharge < MAX_SHIELD_CHARGE){
-                        shieldCharge++;
-                    }
-
-                    // draw the player
-                    drawPerson(ctx, player, PLAYER_COLOR);
                 }
 
                 function drawGrid() {
@@ -214,45 +235,59 @@
                 function drawPlatform(gridLoc) {
                     var row = gridLoc % NUM_COLS;
                     var col = Math.floor(gridLoc/NUM_COLS);
-                    var x = row * gameWidth / NUM_COLS;
-                    var y = (col + 1) * gameHeight / NUM_ROWS;
+                    var x = row * boxWidth;
+                    var y = (col + 1) * boxHeight;
                     ctx.strokeStyle = "black";
                     ctx.beginPath();
-                    ctx.moveTo(x + 1, y);
-                    ctx.lineTo(x + gameWidth / NUM_COLS - 2, y);
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + boxWidth, y);
                     ctx.closePath();
                     ctx.stroke();
                 }
 
-                function drawPerson(ctx, obj, color) {
+                function drawPerson(obj, color) {
                     // O
                     // -+-
                     // /\
                     ctx.beginPath();
                     ctx.strokeStyle = color;
-                    ctx.arc(obj.x + obj.width/2, obj.y + obj.width/2 ,obj.width/2,0, 2 * Math.PI, false);
-                    ctx.moveTo(obj.x + obj.width/2, obj.y + obj.width);
-                    ctx.lineTo(obj.x + obj.width/2, obj.y + obj.height*(2/3));
-                    ctx.lineTo(obj.x, obj.y + obj.height);
-                    ctx.moveTo(obj.x + obj.width/2, obj.y + obj.height*(2/3));
-                    ctx.lineTo(obj.x + obj.width, obj.y + obj.height);
-                    var armStartX = player.x + player.width/2;
-                    var armStartY = player.y + player.height/2;
+                    // head
+                    ctx.arc(obj.x + obj.Width()/2, obj.y + obj.Height()/4 , obj.Height()/4,0, 2 * Math.PI, false);
+                    // torso
+                    ctx.moveTo(obj.x + obj.Width()/2, obj.y + obj.Height()/2);
+                    ctx.lineTo(obj.x + obj.Width()/2, obj.y + obj.Height()*(3/4));
+
+                    // legs
+                    ctx.lineTo(obj.x, obj.y + obj.Height());
+                    ctx.moveTo(obj.x + obj.Width()/2, obj.y + obj.Height()*(3/4));
+                    ctx.lineTo(obj.x + obj.Width(), obj.y + obj.Height());
+                    
+                    // arm(s)
+                    var armStartX = obj.x + obj.Width() * (1/2);
+                    var armStartY = obj.y + obj.Height() * (2/3);
                     ctx.moveTo(armStartX, armStartY);
-                    var dX = armStartX -  mouseX;
-                    var dY = armStartY - mouseY;
+                    var dX;
+                    var dY;
+                    if (obj === player) {
+                        dX = armStartX -  mouseX;
+                        dY = armStartY - mouseY;
+                    } else {
+                        dX = armStartX - player.x;
+                        dY = armStartY - player.y;
+                    }
                     var mag = Math.sqrt(dX * dX + dY * dY);
-                    var handYOffset = (-dY/mag) * player.width;
-                    var handXOffset = (-dX/mag) * player.width;
+                    var handYOffset = (-dY/mag) * player.Width()/2;
+                    var handXOffset = (-dX/mag) * player.Width()/2;
                     var handY = armStartY + handYOffset;
                     var handX = armStartX + handXOffset;
                     ctx.lineTo(handX, handY);
+
                     ctx.closePath();
                     ctx.stroke(); 
 
 
                     if(obj.gun) {
-                        drawGun(obj, gun);
+                        drawGun(obj, obj.gun);
                     }
                 }
 
@@ -262,53 +297,188 @@
                     ctx.lineTo(gun.x2, gun.y2);
                     ctx.lineTo(gun.x3, gun.y3);
                     ctx.stroke();
+                    ctx.closePath();
+                }
+
+                function update() {
+                    // reset this to false every time through
+                    if (hit) {
+                        end();
+                    }
+
+                    if (Math.random() > .994) {
+                        addEnemy();
+                    }
+
+                    updatePlayer();
+
+                    updatePlatforms();
+
+                    updateBullets();
+
+                    updateEnemies();
                 }
 
                 function updateGun(person, gun) {
-                    var armStartX = person.x + person.width/2;
-                    var armStartY = person.y + person.height/2;
-                    var dX = armStartX -  mouseX;
-                    var dY = armStartY - mouseY;
+                    var armStartX = person.x + person.Width()/2;
+                    var armStartY = person.y + person.Height() * (2/3);
+                    var dX;
+                    var dY;
+
+                    if (person === player) {
+                        dX = armStartX -  mouseX;
+                        dY = armStartY - mouseY;
+                    } else {
+                        dX = armStartX - player.x;
+                        dY = armStartY - player.y;
+                    }
                     var mag = Math.sqrt(dX * dX + dY * dY);
-                    var handYOffset = (-dY/mag) * player.width;
-                    var handXOffset = (-dX/mag) * player.width;
+                    var handYOffset = (-dY/mag) * player.Width()/2;
+                    var handXOffset = (-dX/mag) * player.Width()/2;
                     var handY = armStartY + handYOffset;
                     var handX = armStartX + handXOffset;
                     gun.x1 = handX;
                     gun.y1 = handY;
 
-                    var tan = GUN_HEIGHT/player.width;
+                    var gunHeight = person.Height()/4;
+
+                    var tan = gunHeight/player.Width();
 
                     var NEG = handXOffset > 0? 1 : -1;
 
                     gun.x2 = handX - (tan * (NEG * (armStartY - handY)));
                     gun.y2 = handY - (tan * (-NEG * (armStartX - handX)));
 
-                    var tan2 = GUN_LENGTH/GUN_HEIGHT;
+                    var gunLength = person.Width()/2;
+
+                    var tan2 = gunLength/gunHeight;
 
                     gun.x3 = gun.x2 - (tan2 * (-NEG * (handY - gun.y2)));
                     gun.y3 = gun.y2 - (tan2 * (NEG * (handX - gun.x2)));
-                    console.log(gun.x3);
-                    console.log(gun.y3);
                 }
 
-                function update() {
-                    // reset this to false every time through
-                    hit = false;
+                function updateEnemies() {
+                    var e = enemies.length;
+                    while (e--) {
+                        var enemy = enemies[e];
+                        if (enemy.x < 0) {
+                            enemies.splice(e, 1);
+                        } else {
+                            for (var b = 0; b < bullets.length; b++) {
+                                if (bullets[b].isEnemy === false && collides(bullets[b], enemy)) {
+                                    enemies.splice(e, 1);
+                                    kills++;
+                                    break;
+                                }
+                            }
+                        } 
 
-                    var shieldOn = false;
-                    if (Key.isDown(Key.SHIELD) && shieldCharge > 0) {
-                        shieldOn = true;w
+                        if (Math.random() > CHANCE_ENEMY_SHOOT) {
+                            enemyShoot(enemy);
+                        }
+                        updateEnemy(enemy);
+                    }
+                }
+
+                function updateBullets() {
+                    var b = bullets.length;
+                    while(b--) {
+                        var bullet = bullets[b];            
+                        bullet.x += bullet.vx;
+                        bullet.y += bullet.vy;
+                        if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
+                            bullets.splice(b, 1);
+                        }
+
+                        if (bullet.isEnemy && collides(bullet, player)) {
+                            hit = true;
+                        } 
+                    }
+                }
+
+                function updatePlatforms() {
+                    for (var p = 0; p < platforms.length; p++) {
+                        var platform = platforms[p];
+                        var row = platform % NUM_COLS;
+                        var col = Math.floor(platform/NUM_COLS);
+                        var x = row * gameWidth / NUM_COLS;
+                        var y = (col + 1) * gameHeight / NUM_ROWS;
+                        ctx.lineTo(x + gameWidth / NUM_COLS , y);
+                        var pObj = {x: x, y: y, Height: function() { return 1; }, Width: function () { return gameWidth/NUM_COLS;}, };
+
+                        if (collides(player, pObj)) {
+                            if (player.vY > 0) {
+                                // player is above the platform
+                                player.y = y - player.Height() ;
+                                player.vY = 0;
+                                player.jumping = false;
+                            } else {
+                                // player is below the platform
+                                player.vY = 0;
+                                player.y = y;
+                            }
+                        }
+                    }
+                }
+
+                function updateEnemy(enemy) {
+                    enemy.crouching = false;
+                    var r = Math.random();
+                    if (r > .99) {
+                        jump(enemy);
                     } 
+                    else if (r > .95 && r < .99) {
+                        moveLeft(enemy)
+                    } else if (r > .94 && r < .95) {
+                        crouch(enemy);
+                    }
+                    
+                    enemy.vY += enemy.aY;
+                    enemy.y += enemy.vY;
+                    if (enemy.y + enemy.Height() >= gameHeight) {
+                        enemy.y = gameHeight - enemy.Height();
+                        // want normal force to cancel gravity!
+                        enemy.vY = 0; 
+                        enemy.jumping = false;
+                    }
 
-                    if (Key.isDown(Key.UP)) jump();
-                    if (Key.isDown(Key.LEFT)) moveLeft();
-                    if (Key.isDown(Key.RIGHT)) moveRight();
+                    if (enemy.vX !== 0) {
+                        enemy.aX = enemy.vX > 0 ? -FRICTION * MASS : FRICTION * MASS;
+                    } else {
+                        enemy.aX = 0;
+                    }
+
+                    enemy.vX += enemy.aX;
+                    if (Math.abs(enemy.vX) > MAX_SPEED) {
+                        enemy.vX = enemy.vX > 0 ? MAX_SPEED : -MAX_SPEED;
+                    }
+                    enemy.x += enemy.vX;
+
+                    if (enemy.x > gameWidth - enemy.Width()) {
+                        enemy.x = gameWidth - enemy.Width();
+                        enemy.vX = 0;
+                        enemy.aX = 0;
+                    }
+                    if (enemy.x < 0) {
+                        enemy.vX = 0;
+                        enemy.aX = 0;
+                        enemy.x = 0;
+                    }
+                    updateGun(enemy, enemy.gun);
+                }
+
+                function updatePlayer() {
+                    player.crouching = false;
+
+                    if (Key.isDown(Key.UP)) jump(player);
+                    if (Key.isDown(Key.LEFT)) moveLeft(player);
+                    if (Key.isDown(Key.RIGHT)) moveRight(player);
+                    if (Key.isDown(Key.DOWN)) crouch(player);
 
                     player.vY += player.aY;
                     player.y += player.vY;
-                    if (player.y + player.height >= gameHeight) {
-                        player.y = gameHeight - player.height;
+                    if (player.y + player.Height() >= gameHeight) {
+                        player.y = gameHeight - player.Height();
                         // want normal force to cancel gravity!
                         player.vY = 0; 
                         player.jumping = false;
@@ -326,8 +496,8 @@
                     }
                     player.x += player.vX;
 
-                    if (player.x > gameWidth - player.width) {
-                        player.x = gameWidth - player.width;
+                    if (player.x > gameWidth - player.Width()) {
+                        player.x = gameWidth - player.Width();
                         player.vX = 0;
                         player.aX = 0;
                     }
@@ -338,87 +508,13 @@
                     }
 
                     updateGun(player, player.gun);
-
-                    /*if (Key.isDown(Key.UP)) moveUp();
-                    if (Key.isDown(Key.DOWN)) moveDown();*/
-
-                    for (var p = 0; p < platforms.length; p++) {
-                        var platform = platforms[p];
-                        var row = platform % NUM_COLS;
-                        var col = Math.floor(platform/NUM_COLS);
-                        var x = row * gameWidth / NUM_COLS;
-                        var y = (col + 1) * gameHeight / NUM_ROWS;
-                        ctx.lineTo(x + gameWidth / NUM_COLS , y);
-                        var pObj = {x: x, y: y, height: 1, width: gameWidth/NUM_COLS};
-
-                        if (collides(player, pObj)) {
-                            if (player.vY > 0) {
-                                // player is above the platform
-                                player.y = y - player.height ;
-                                player.vY = 0;
-                                player.jumping = false;
-                            } else {
-                                // player is below the platform
-                                player.vY = 0;
-                                player.y = y;
-                            }
-                        }
-                    }
-
-
-
-                    var shield = getShieldObject();
-
-                    var b = bullets.length;
-                    while(b--) {
-                        var bullet = bullets[b];            
-                        bullet.x += bullet.vx;
-                        bullet.y += bullet.vy;
-                        if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
-                            bullets.splice(b, 1);
-                        }
-
-                        if (bullet.isEnemy && collides(bullet, player)) {
-                            hit = true;
-                        } else if (shieldOn && bullet.isEnemy &&
-                            circleSquareCollides(shield, bullet)) {
-                            bullet.isEnemy = false;
-                            bullet.vx = -bullet.vx;
-                            bullet.vy = -bullet.vy;
-                        }
-                    }
-
-                    var e = enemies.length;
-                    while (e--) {
-                        var enemy = enemies[e];
-                        if (enemy.x < 0) {
-                            enemies.splice(e, 1);
-                        } else {
-                            for (var b = 0; b < bullets.length; b++) {
-                                if (bullets[b].isEnemy === false && collides(bullets[b], enemy)) {
-                                    enemies.splice(e, 1);
-                                    kills++;
-                                    break;
-                                }
-                            }
-                            if (collides(enemy, player)) {
-                                end();
-                            }
-                        } 
-
-                        if (Math.random() > CHANCE_ENEMY_SHOOT) {
-                            enemyShoot(enemy);
-                        }
-
-                        enemy.x -= enemy.speed;
-                    }
                 }
 
-                function jump() {
+                function jump(person) {
                     // can't jump if we are falling or already jumping...
-                    if (!player.jumping && player.vY === 0) {
-                        player.jumping = true;
-                        player.vY -= 15;
+                    if (!person.jumping && person.vY === 0) {
+                        person.jumping = true;
+                        person.vY -= 15;
                     }
                 }
 
@@ -430,22 +526,19 @@
                     player.vy = 50;*/
                 }
 
-                function moveDown() {
-                    /*player.y += player.speed;
-                    if (player.y > gameHeight - player.height) {
-                        player.y = gameHeight - player.height;
-                    }*/
+                function crouch(person) {
+                    person.crouching = true;
                 }
 
-                function moveLeft() {
-                    if (player.vY === 0) {
-                        player.vX -= 1;
+                function moveLeft(person) {
+                    if (person.vY === 0) {
+                        person.vX -= 1;
                     }
                 }
 
-                function moveRight() {
-                    if (player.vY === 0) {
-                        player.vX += 1;
+                function moveRight(person) {
+                    if (person.vY === 0) {
+                        person.vX += 1;
                     }
                 }
 
@@ -453,14 +546,6 @@
                     var event = e || window.e;
                     mouseX = event.clientX;
                     mouseY = event.clientY;
-                }
-
-                function shieldOn() {
-                    isShieldOn = true;
-                }
-
-                function shieldOff() {
-                    isShieldOn = false;
                 }
 
                 function shoot() {
@@ -476,6 +561,8 @@
                     bullet.vy = (-dY/mag) * BULLET_SPEED;
                     bullet.vx = (-dX/mag) * BULLET_SPEED;
                     bullet.isEnemy = false;
+                    bullet.Width = function() { return this.width * boxWidth};
+                    bullet.Height = function() { return this.height * boxHeight};
                     bullets.push(bullet);
                 }
 
@@ -486,8 +573,8 @@
 
                 function enemyShoot(enemy) {
                     var bullet = {};
-                    bullet.x = enemy.x + enemy.width/2;
-                    bullet.y = enemy.y + enemy.height/2;
+                    bullet.x = enemy.x + enemy.Width()/2;
+                    bullet.y = enemy.y + enemy.Height()/2;
                     bullet.width = BULLET_WIDTH;
                     bullet.height = BULLET_HEIGHT;
                     var dX = bullet.x - player.x;
@@ -495,47 +582,43 @@
                     var mag = Math.sqrt(dX*dX + dY * dY);
                     bullet.vy = (-dY/mag) * BULLET_SPEED;
                     bullet.vx = (-dX/mag) * BULLET_SPEED;
+                    bullet.Width = function() { return this.width * boxWidth};
+                    bullet.Height = function() { return this.height * boxHeight};
                     bullet.isEnemy = true;
                     bullets.push(bullet);
                 }
 
 
                 function addEnemy() {
-                    var enemy = {};
-                    enemy.x = gameWidth - ENEMY_HEIGHT;
+                    var enemy = Object.create(Person);
+                    enemy.x = (gameWidth - ENEMY_HEIGHT) * Math.random();
                     enemy.y = (gameHeight - ENEMY_HEIGHT) * Math.random();
                     enemy.width = ENEMY_WIDTH;
                     enemy.height = ENEMY_HEIGHT;
-                    enemy.direction = "left";
                     enemy.speed = ENEMY_SPEED;
+                    enemy.gun = {};
                     enemies.push(enemy);
                 }
 
                 function collides(obj1, obj2) {
-                    if ((obj1.x < obj2.x + obj2.width) &&
-                        (obj1.x + obj1.width > obj2.x) &&
-                        (obj1.y < obj2.y + obj2.height) &&
-                        (obj1.y + obj1.height > obj2.y)) {
+                    if ((obj1.x < obj2.x + obj2.Width()) &&
+                        (obj1.x + obj1.Width() > obj2.x) &&
+                        (obj1.y < obj2.y + obj2.Height()) &&
+                        (obj1.y + obj1.Height() > obj2.y)) {
                         return true;
                     } 
                     return false;
                 }
 
                 function circleSquareCollides(circle, square) {
-                    var dx = circle.x - (square.x + square.width/2);
-                    var dy = circle.y - (square.y + square.height/2);
+                    var dx = circle.x - (square.x + square.Width()/2);
+                    var dy = circle.y - (square.y + square.Height()/2);
                     if (circle.radius * circle.radius > (dx*dx + dy*dy)) {
                         return true;
                     } else {
                         return false;
                     }
                 }
-
-
-                function getShieldObject() {
-                    return {radius: SHIELD_RADIUS, x: player.x + player.width/2, y: player.y + player.height/2};
-                }
-
 
                 function showStartMenu() {
                     startMenu.style.display = "block";
@@ -544,7 +627,6 @@
                 function hideStartMenu() {
                     startMenu.style.display = "none";
                 }
-
 
                 var Key = {
                     _pressed: {},
