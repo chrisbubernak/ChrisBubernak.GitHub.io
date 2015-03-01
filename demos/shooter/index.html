@@ -63,6 +63,7 @@
                 var PLAYER_COLOR = "green";
                 var BULLET_COLOR = "blue";
                 var BLOOD_COLOR = "red";
+                var PLATFORM_COLOR = "black";
                 var FPS = 60;
                 var PLAYER_WIDTH = .75;
                 var PLAYER_HEIGHT = 1.5;
@@ -107,7 +108,7 @@
                 var shieldCharge;
                 var timer;
                 var bloods = [];
-                var platforms = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
+                var platforms = [];
                 // setup event listeners
                 document.onmousemove = mouseMove;
                 document.onmouseup = shoot;
@@ -129,6 +130,7 @@
                     jumping: false,
                     crouching: false,
                     bounce: false,
+                    color: ENEMY_COLOR,
                     Width: function() {  
                         return boxWidth * this.width;
                     }, 
@@ -137,7 +139,8 @@
                             return boxHeight * this.height / 2;
                         } 
                         return boxHeight * this.height;
-                    }
+                    },
+                    Draw: drawPerson
 
                 };                
 
@@ -145,6 +148,11 @@
                 start();
 
                 function start() {
+                    var platformLocs = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
+                    for (var i = 0; i < platformLocs.length; i++) {
+                        addPlatform(platformLocs[i]);
+                    }
+
                     hideStartMenu();
                     kills = 0;
                     mouseX = 0;
@@ -153,7 +161,9 @@
                     enemies = [];
                     hit = false;
                     player = Object.create(Person);
+                    player.Update = function() {updatePlayer();}
                     player.gun = {};
+                    player.color = PLAYER_COLOR;
                     timer = setInterval(run, 1000/FPS);
 
                     canvas.width = gameWidth;
@@ -181,47 +191,22 @@
                     canvas.height = gameHeight;
                     ctx.clearRect(0, 0, gameWidth, gameHeight);    
 
-                    //drawGrid();
-
-                    drawPlatforms();
-
-                    drawBullets();
-
-                    drawEnemies();
-
-                    drawBloods();
-
-                    drawPerson(player, PLAYER_COLOR);
-                }
-
-                function drawBloods() {
-                    for (var b = 0; b < bloods.length; b++) {
-                        var blood = bloods[b];
-                        ctx.fillStyle = BLOOD_COLOR;
-                        ctx.fillRect(blood.x + blood.Width()/2, blood.y + blood.Height()/2, blood.Width(), blood.Height());
+                    var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
+                    var o = gameObjects.length;
+                    while(o--) {
+                        gameObjects[o].Draw();
                     }
                 }
 
-                function drawPlatforms() { 
-                    for (var p = 0; p < platforms.length; p++) {
-                        drawPlatform(platforms[p]);
-                    }
+                function drawBlood() {
+                    ctx.fillStyle = BLOOD_COLOR;
+                    ctx.fillRect(this.x + this.Width()/2, this.y + this.Height()/2, this.Width(), this.Height());
                 }
 
-                function drawBullets() {
-                    for (var b = 0; b < bullets.length; b++) {
-                        var bullet = bullets[b];
-                        ctx.fillStyle = BULLET_COLOR;
-                        ctx.fillRect(bullet.x + bullet.Width()/2, bullet.y + bullet.Height()/2, bullet.Width(), bullet.Height());
-                    }
-                }
-
-
-                function drawEnemies() {
-                    for (var e = 0; e < enemies.length; e++) {
-                        var enemy = enemies[e];
-                        drawPerson(enemy, ENEMY_COLOR);
-                    }
+                function drawBullet() {
+                    var bullet = this;
+                    ctx.fillStyle = BULLET_COLOR;
+                    ctx.fillRect(bullet.x + bullet.Width()/2, bullet.y + bullet.Height()/2, bullet.Width(), bullet.Height());
                 }
 
                 function drawGrid() {
@@ -239,25 +224,18 @@
                 }
 
                 function drawPlatform(gridLoc) {
-                    var row = gridLoc % NUM_COLS;
-                    var col = Math.floor(gridLoc/NUM_COLS);
-                    var x = row * boxWidth;
-                    var y = (col + 1) * boxHeight;
-                    ctx.strokeStyle = "black";
-                    /*ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + boxWidth, y);
-                    ctx.closePath();*/
-                    ctx.rect(x, y, boxWidth, PLATFORM_HEIGHT * boxHeight)
+                    ctx.strokeStyle = this.color;
+                    ctx.rect(this.x, this.y, this.Width(), this.Height())
                     ctx.stroke();
                 }
 
-                function drawPerson(obj, color) {
+                function drawPerson() {
+                    var obj = this;
                     // O
                     // -+-
                     // /\
                     ctx.beginPath();
-                    ctx.strokeStyle = color;
+                    ctx.strokeStyle = obj.color;
                     // head
                     ctx.arc(obj.x + obj.Width()/2, obj.y + obj.Height()/4 , obj.Height()/4,0, 2 * Math.PI, false);
                     // torso
@@ -418,13 +396,7 @@
                         }
                         for (var p = 0; p < platforms.length; p++) {
                             var platform = platforms[p];
-                            var row = platform % NUM_COLS;
-                            var col = Math.floor(platform/NUM_COLS);
-                            var x = row * gameWidth / NUM_COLS;
-                            var y = (col + 1) * gameHeight / NUM_ROWS;
-                            var pObj = {x: x, y: y, Height: function() { return boxHeight * PLATFORM_HEIGHT; }, Width: function () { return gameWidth/NUM_COLS;}};
-
-                            if (collides(bullet, pObj)) {
+                            if (collides(bullet, platform)) {
                                 bullet.owner = "";
                                 bullet.vy *= -1;
                             } 
@@ -435,23 +407,17 @@
                 function updatePlatforms() {
                     for (var p = 0; p < platforms.length; p++) {
                         var platform = platforms[p];
-                        var row = platform % NUM_COLS;
-                        var col = Math.floor(platform/NUM_COLS);
-                        var x = row * gameWidth / NUM_COLS;
-                        var y = (col + 1) * gameHeight / NUM_ROWS;
-                        ctx.lineTo(x + gameWidth / NUM_COLS , y);
-                        var pObj = {x: x, y: y, Height: function() { return boxHeight * PLATFORM_HEIGHT; }, Width: function () { return gameWidth/NUM_COLS;}};
 
-                        if (collides(player, pObj)) {
+                        if (collides(player, platform)) {
                             if (player.vY > 0) {
                                 // player is above the platform
-                                player.y = y - player.Height() ;
+                                player.y = platform.y - player.Height() ;
                                 player.vY = 0;
                                 player.jumping = false;
                             } else {
                                 // player is below the platform
                                 player.vY = 0;
-                                player.y = y + boxHeight * PLATFORM_HEIGHT;
+                                player.y = platform.y + platform.Height();
                             }
                         }
                     }
@@ -597,6 +563,7 @@
                     bullet.vy = (-dY/mag) * BULLET_SPEED;
                     bullet.vx = (-dX/mag) * BULLET_SPEED;
                     bullet.owner = "player";
+                    bullet.Draw = drawBullet;
                     bullet.Width = function() { return this.width * boxWidth};
                     bullet.Height = function() { return this.height * boxHeight};
                     bullets.push(bullet);
@@ -620,6 +587,7 @@
                     bullet.vx = (-dX/mag) * BULLET_SPEED;
                     bullet.Width = function() { return this.width * boxWidth};
                     bullet.Height = function() { return this.height * boxHeight};
+                    bullet.Draw = drawBullet;
                     bullet.owner = "enemy";
                     bullets.push(bullet);
                 }
@@ -632,8 +600,24 @@
                     enemy.width = ENEMY_WIDTH;
                     enemy.height = ENEMY_HEIGHT;
                     enemy.speed = ENEMY_SPEED;
+                    enemy.Draw = drawPerson
                     enemy.gun = {};
                     enemies.push(enemy);
+                }
+
+                function addPlatform(loc) {
+                    var platform = {};
+                    var row = loc % NUM_COLS;
+                    var col = Math.floor(loc/NUM_COLS);
+                    var x = row * gameWidth / NUM_COLS;
+                    var y = (col + 1) * gameHeight / NUM_ROWS;
+                    platform.color = PLATFORM_COLOR;
+                    platform.x = x;
+                    platform.y = y; 
+                    platform.Height = function() { return boxHeight * PLATFORM_HEIGHT; };
+                    platform.Width = function () { return gameWidth/NUM_COLS; };
+                    platform.Draw = drawPlatform;
+                    platforms.push(platform);
                 }
 
                 function addBloods(x, y) {
@@ -645,7 +629,8 @@
                             vY: -Math.random() * JUMP_VELOCITY * boxHeight,
                             aY: GRAVITY,
                             Width: function() { return BULLET_WIDTH * boxWidth},
-                            Height: function() { return BULLET_HEIGHT * boxHeight}
+                            Height: function() { return BULLET_HEIGHT * boxHeight},
+                            Draw: drawBlood
                         }
                         bloods.push(blood);
                     }
