@@ -59,14 +59,10 @@
                 var BULLET_WIDTH = .1;
                 var BULLET_HEIGHT = .1;
                 var BULLET_SPEED = 6;
-                var ENEMY_COLOR = "red";
-                var BACKGROUND_COLOR = "black";
+                var ENEMY_COLOR = "black";
                 var PLAYER_COLOR = "green";
                 var BULLET_COLOR = "blue";
-                var PLAYER_BULLET_COLOR = "red";
-                var LASER_COLOR = "red";
-                var SHIELD_COLOR = "lightblue";
-                var SHIELD_RADIUS = 20;
+                var BLOOD_COLOR = "red";
                 var FPS = 60;
                 var PLAYER_WIDTH = .75;
                 var PLAYER_HEIGHT = 1.5;
@@ -82,12 +78,15 @@
                 var SHIELD_BAR_Y_OFFSET = 40;
                 var KILLS_X_OFFSET = 30;
                 var KILLS_Y_OFFSET = 57;
-                var CHANCE_ADD_ENEMY = .95;
+                var CHANCE_ADD_ENEMY = .995;
                 var CHANCE_ENEMY_SHOOT = .99;
                 var GRAVITY = 1;
                 var MASS = 1;
                 var FRICTION = .5;
                 var MAX_SPEED = 10;
+                var JUMP_VELOCITY = .5;
+                var PLATFORM_HEIGHT = .25
+                var NUM_BLOODS = 20;
 
                 // globals
                 var gameHeight = window.innerHeight;
@@ -99,6 +98,7 @@
                 var mouseY;
                 var bullets;
                 var enemies;
+                var gameObjects = [];
                 var player;
                 var canvas = document.getElementById('canvas');
                 var ctx = canvas.getContext("2d");
@@ -106,7 +106,8 @@
                 var hit;
                 var shieldCharge;
                 var timer;
-                var platforms = [340, 341, 342, 324, 306, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
+                var bloods = [];
+                var platforms = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
                 // setup event listeners
                 document.onmousemove = mouseMove;
                 document.onmouseup = shoot;
@@ -153,7 +154,6 @@
                     hit = false;
                     player = Object.create(Person);
                     player.gun = {};
-                    addEnemy();
                     timer = setInterval(run, 1000/FPS);
 
                     canvas.width = gameWidth;
@@ -189,7 +189,17 @@
 
                     drawEnemies();
 
+                    drawBloods();
+
                     drawPerson(player, PLAYER_COLOR);
+                }
+
+                function drawBloods() {
+                    for (var b = 0; b < bloods.length; b++) {
+                        var blood = bloods[b];
+                        ctx.fillStyle = BLOOD_COLOR;
+                        ctx.fillRect(blood.x + blood.Width()/2, blood.y + blood.Height()/2, blood.Width(), blood.Height());
+                    }
                 }
 
                 function drawPlatforms() { 
@@ -201,11 +211,7 @@
                 function drawBullets() {
                     for (var b = 0; b < bullets.length; b++) {
                         var bullet = bullets[b];
-                        if (bullet.isEnemy) {
-                            ctx.fillStyle = BULLET_COLOR;
-                        } else {
-                            ctx.fillStyle = PLAYER_BULLET_COLOR;
-                        }
+                        ctx.fillStyle = BULLET_COLOR;
                         ctx.fillRect(bullet.x + bullet.Width()/2, bullet.y + bullet.Height()/2, bullet.Width(), bullet.Height());
                     }
                 }
@@ -238,10 +244,11 @@
                     var x = row * boxWidth;
                     var y = (col + 1) * boxHeight;
                     ctx.strokeStyle = "black";
-                    ctx.beginPath();
+                    /*ctx.beginPath();
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + boxWidth, y);
-                    ctx.closePath();
+                    ctx.closePath();*/
+                    ctx.rect(x, y, boxWidth, PLATFORM_HEIGHT * boxHeight)
                     ctx.stroke();
                 }
 
@@ -306,7 +313,7 @@
                         end();
                     }
 
-                    if (Math.random() > .994) {
+                    if (Math.random() > CHANCE_ADD_ENEMY) {
                         addEnemy();
                     }
 
@@ -317,6 +324,8 @@
                     updateBullets();
 
                     updateEnemies();
+
+                    updateBloods();
                 }
 
                 function updateGun(person, gun) {
@@ -365,9 +374,10 @@
                             enemies.splice(e, 1);
                         } else {
                             for (var b = 0; b < bullets.length; b++) {
-                                if (bullets[b].isEnemy === false && collides(bullets[b], enemy)) {
+                                if (bullets[b].owner !== "enemy" && collides(bullets[b], enemy)) {
                                     enemies.splice(e, 1);
                                     kills++;
+                                    addBloods(bullets[b].x, bullets[b].y);
                                     break;
                                 }
                             }
@@ -377,6 +387,19 @@
                             enemyShoot(enemy);
                         }
                         updateEnemy(enemy);
+                    }
+                }
+
+                function updateBloods() {
+                    var b = bloods.length;
+                    while(b--) {
+                        var blood = bloods[b];
+                        blood.vY += blood.aY;
+                        blood.x += blood.vX;
+                        blood.y += blood.vY;
+                        if (blood.x > gameWidth || blood.x < 0 || blood.y > gameHeight || blood.y < 0) {
+                            bloods.splice(b, 1);
+                        }
                     }
                 }
 
@@ -390,9 +413,22 @@
                             bullets.splice(b, 1);
                         }
 
-                        if (bullet.isEnemy && collides(bullet, player)) {
+                        if (bullet.owner !== "player" && collides(bullet, player)) {
                             hit = true;
-                        } 
+                        }
+                        for (var p = 0; p < platforms.length; p++) {
+                            var platform = platforms[p];
+                            var row = platform % NUM_COLS;
+                            var col = Math.floor(platform/NUM_COLS);
+                            var x = row * gameWidth / NUM_COLS;
+                            var y = (col + 1) * gameHeight / NUM_ROWS;
+                            var pObj = {x: x, y: y, Height: function() { return boxHeight * PLATFORM_HEIGHT; }, Width: function () { return gameWidth/NUM_COLS;}};
+
+                            if (collides(bullet, pObj)) {
+                                bullet.owner = "";
+                                bullet.vy *= -1;
+                            } 
+                        }
                     }
                 }
 
@@ -404,7 +440,7 @@
                         var x = row * gameWidth / NUM_COLS;
                         var y = (col + 1) * gameHeight / NUM_ROWS;
                         ctx.lineTo(x + gameWidth / NUM_COLS , y);
-                        var pObj = {x: x, y: y, Height: function() { return 1; }, Width: function () { return gameWidth/NUM_COLS;}, };
+                        var pObj = {x: x, y: y, Height: function() { return boxHeight * PLATFORM_HEIGHT; }, Width: function () { return gameWidth/NUM_COLS;}};
 
                         if (collides(player, pObj)) {
                             if (player.vY > 0) {
@@ -415,7 +451,7 @@
                             } else {
                                 // player is below the platform
                                 player.vY = 0;
-                                player.y = y;
+                                player.y = y + boxHeight * PLATFORM_HEIGHT;
                             }
                         }
                     }
@@ -514,7 +550,7 @@
                     // can't jump if we are falling or already jumping...
                     if (!person.jumping && person.vY === 0) {
                         person.jumping = true;
-                        person.vY -= 15;
+                        person.vY -= JUMP_VELOCITY * boxHeight;
                     }
                 }
 
@@ -531,15 +567,15 @@
                 }
 
                 function moveLeft(person) {
-                    if (person.vY === 0) {
+                    //if (person.vY === 0) {
                         person.vX -= 1;
-                    }
+                    //}
                 }
 
                 function moveRight(person) {
-                    if (person.vY === 0) {
+                    //if (person.vY === 0) {
                         person.vX += 1;
-                    }
+                    //}
                 }
 
                 function mouseMove(e) {
@@ -560,7 +596,7 @@
                     var mag = Math.sqrt(dX*dX + dY * dY);
                     bullet.vy = (-dY/mag) * BULLET_SPEED;
                     bullet.vx = (-dX/mag) * BULLET_SPEED;
-                    bullet.isEnemy = false;
+                    bullet.owner = "player";
                     bullet.Width = function() { return this.width * boxWidth};
                     bullet.Height = function() { return this.height * boxHeight};
                     bullets.push(bullet);
@@ -584,7 +620,7 @@
                     bullet.vx = (-dX/mag) * BULLET_SPEED;
                     bullet.Width = function() { return this.width * boxWidth};
                     bullet.Height = function() { return this.height * boxHeight};
-                    bullet.isEnemy = true;
+                    bullet.owner = "enemy";
                     bullets.push(bullet);
                 }
 
@@ -600,6 +636,21 @@
                     enemies.push(enemy);
                 }
 
+                function addBloods(x, y) {
+                    for (var i = 0; i < NUM_BLOODS; i++) {
+                        var blood = {
+                            x: x,
+                            y: y,
+                            vX: Math.random() * boxWidth/8 - boxWidth/16,
+                            vY: -Math.random() * JUMP_VELOCITY * boxHeight,
+                            aY: GRAVITY,
+                            Width: function() { return BULLET_WIDTH * boxWidth},
+                            Height: function() { return BULLET_HEIGHT * boxHeight}
+                        }
+                        bloods.push(blood);
+                    }
+                }
+
                 function collides(obj1, obj2) {
                     if ((obj1.x < obj2.x + obj2.Width()) &&
                         (obj1.x + obj1.Width() > obj2.x) &&
@@ -608,16 +659,6 @@
                         return true;
                     } 
                     return false;
-                }
-
-                function circleSquareCollides(circle, square) {
-                    var dx = circle.x - (square.x + square.Width()/2);
-                    var dy = circle.y - (square.y + square.Height()/2);
-                    if (circle.radius * circle.radius > (dx*dx + dy*dy)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
                 }
 
                 function showStartMenu() {
