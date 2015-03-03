@@ -143,13 +143,15 @@
                     Collides: function(obj) {
                     	if (obj.type === "bullet" && obj.owner !== this.type) {
                     		end();
-                    	} else if (obj.type === "platform") {
-                            if (player.vY > 0) {
+                    	} else if (obj.type === "platform" && !this.collided) {
+                    		this.collided = true;
+							var goingUp = player.vY < 0;
+                            if (!goingUp) {
                                 // player is above the platform
-                                player.y = obj.y - player.Height() ;
+                                player.y = obj.y - player.Height();
                                 player.vY = 0;
                                 player.jumping = false;
-                            } else {
+                            } else if (goingUp){
                                 // player is below the platform
                                 player.vY = 0;
                                 player.y = obj.y + obj.Height();
@@ -157,8 +159,8 @@
 						}         
    		        	},
                     Move: function() {
-                    	var player = this;
                     	player.crouching = false;
+                    	player.collided = false;
 	                    if (Key.isDown(Key.UP)) jump(player);
 	                    if (Key.isDown(Key.LEFT)) moveLeft(player);
 	                    if (Key.isDown(Key.RIGHT)) moveRight(player);
@@ -168,7 +170,7 @@
 	                    player.y += player.vY;
 	                    if (player.y + player.Height() >= gameHeight) {
 	                        player.y = gameHeight - player.Height();
-	                        // want normal force to cancel gravity!
+	                        // want normal force to dwcancel gravity!
 	                        player.vY = 0; 
 	                        player.jumping = false;
 	                    }
@@ -206,6 +208,7 @@
                 start();
 
                 function start() {
+                	platforms = [];
                     var platformLocs = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
                     for (var i = 0; i < platformLocs.length; i++) {
                         addPlatform(platformLocs[i]);
@@ -219,7 +222,6 @@
                     enemies = [];
                     hit = false;
                     player = Object.create(Person);
-                    player.Update = function() {updatePlayer();}
                     player.gun = {};
                     player.color = PLAYER_COLOR;
                     timer = setInterval(run, 1000/FPS);
@@ -258,7 +260,7 @@
 
                 function drawBlood() {
                     ctx.fillStyle = BLOOD_COLOR;
-                    ctx.fillRect(this.x + this.Width()/2, this.y + this.Height()/2, this.Width(), this.Height());
+                    ctx.fillRect(this.x + this.Width()/2, this.ay + this.Height()/2, this.Width(), this.Height());
                 }
 
                 function drawBullet() {
@@ -351,7 +353,6 @@
 
                     var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
 
-
                     // positional logic
                     for (var o = 0; o < gameObjects.length; o++) {
                     	gameObjects[o].Move();
@@ -432,6 +433,7 @@
                 	if (Math.random() > CHANCE_ENEMY_SHOOT) {
                         enemyShoot(enemy);
                     }
+                    enemy.collided = false;
                     enemy.crouching = false;
                     var r = Math.random();
                     if (r > .99) {
@@ -525,10 +527,11 @@
                     bullet.Width = function() { return this.width * boxWidth};
                     bullet.Height = function() { return this.height * boxHeight};
                     bullet.Collides = function(obj) { 
-                    	if (obj.type === "platform") {
+                    	if (obj.type === "platform" && !this.collided) {
+                    		this.collided = true;
                     		this.vy *= -1;
                     		this.owner = "";
-                    	} else if (obj.type === this.owner) {
+                    	} else if (obj.type === this.owner || obj.type === "platform") {
                     		//no op
                     	} 
                     	else {
@@ -537,6 +540,7 @@
                     };
                     bullet.Move = function() {
                     	var bullet = this;
+                    	bullet.collided = false;
                     	bullet.x += bullet.vx;
                         bullet.y += bullet.vy;
                         if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
@@ -548,7 +552,14 @@
 
                 function special() {
                     // todo: do something cool here, for now just shoot
-                    shoot();
+                    addPlatform(getLoc(player));
+                }
+
+                // get the grid loc a player is "most" in
+                function getLoc(obj) {
+                	var col = Math.floor(NUM_COLS * ((obj.x + obj.Width()/2)/gameWidth));
+                	var row = Math.floor(NUM_ROWS * ((obj.y + obj.Height()/2)/gameHeight));
+					return row * NUM_COLS + col;
                 }
 
                 function enemyShoot(enemy) {
@@ -566,11 +577,12 @@
                     bullet.Width = function() { return this.width * boxWidth};
                     bullet.Height = function() { return this.height * boxHeight};
                     bullet.Collides = function(obj) { 
-                    	if (obj.type === "platform") {
+                    	if (obj.type === "platform" && !this.collided) {
+                    		this.collided = true;
                     		this.owner = "";
                     		this.vy *= -1;
-                    	} else if (obj.type === this.owner) {
-                    		//no op
+                    	} else if (obj.type === this.owner || obj.owner === this.owner || obj.type === "platform") {
+                    		//no op if we hit our owner or another of our own bullets
                     	} 
                     	else {
                     		this.dead = true;
@@ -578,11 +590,11 @@
                     };
                     bullet.Move = function() {
                     	var bullet = this;
+                    	bullet.collided = false;
                     	bullet.x += bullet.vx;
                         bullet.y += bullet.vy;
                         if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
-                            bullets.splice(b, 1);
-                        }
+                            this.dead = true;                        }
                     };                    
                     bullets.push(bullet);
                     bullet.Draw = drawBullet;
@@ -605,18 +617,20 @@
                     	if (obj.type === "bullet" && obj.owner !== this.type) {
                     		this.dead = true;
                             addBloods(obj.x, obj.y);
-                    	} else if (obj.type === "platform") {
-                            if (this.vY > 0) {
-                                // above the platform
-                                this.y = obj.y - this.Height() ;
+                    	} else if (obj.type === "platform" && !this.collided) {
+                    		this.collided = true;
+							var goingUp = this.vY < 0;
+                            if (!goingUp) {
+                                // player is above the platform
+                                this.y = obj.y -this.Height();
                                 this.vY = 0;
                                 this.jumping = false;
-                            } else {
-                                // below the platform
+                            } else if (goingUp){
+                                // player is below the platform
                                 this.vY = 0;
-                                this.y = obj.y + this.Height();
-                            }
-						}
+                                this.y = obj.y + obj.Height();
+                        	}	
+                    	}
 					};
                     enemy.Move = function() {
                     	updateEnemy(this);
@@ -656,11 +670,10 @@
                             Draw: drawBlood,
                             Collides: function() { return; }, //no op!
                             Move: function() {
-                            	var blood = this;
-                            	blood.vY += blood.aY;
-		                        blood.x += blood.vX;
-		                        blood.y += blood.vY;
-		                        if (blood.x > gameWidth || blood.x < 0 || blood.y > gameHeight || blood.y < 0) {
+                            	this.vY += this.aY;
+		                        this.x += this.vX;
+		                        this.y += this.vY;
+		                        if (this.x > gameWidth || this.x < 0 || this.y > gameHeight || this.y < 0) {
 		                            this.dead = true;
 		                        }
                             }
