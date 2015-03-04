@@ -56,12 +56,12 @@
                 var ENEMY_WIDTH = .6;
                 var ENEMY_HEIGHT = 1.5;
                 var ENEMY_SPEED = 3;
-                var BULLET_WIDTH = .1;
-                var BULLET_HEIGHT = .1;
-                var BULLET_SPEED = 6;
+                //var BULLET_WIDTH = .1;
+                //var BULLET_HEIGHT = .1;
+                //var BULLET_SPEED = 6;
                 var ENEMY_COLOR = "black";
                 var PLAYER_COLOR = "green";
-                var BULLET_COLOR = "blue";
+                //var BULLET_COLOR = "blue";
                 var BLOOD_COLOR = "red";
                 var PLATFORM_COLOR = "black";
                 var FPS = 60;
@@ -70,15 +70,8 @@
                 var PLAYER_SPEED = 3;
                 var GUN_LENGTH = 15; 
                 var TEXT_COLOR = "black";
-                var MAX_SHIELD_CHARGE = 100;
                 var STARTING_X = 50;
                 var STARTING_Y = 200;
-                var SHIELD_BAR_WIDTH = 150;
-                var SHIELD_BAR_HEIGHT = 20;
-                var SHIELD_BAR_X_OFFSET = 65;
-                var SHIELD_BAR_Y_OFFSET = 40;
-                var KILLS_X_OFFSET = 30;
-                var KILLS_Y_OFFSET = 57;
                 var CHANCE_ADD_ENEMY = .995;
                 var CHANCE_ENEMY_SHOOT = .99;
                 var GRAVITY = 1;
@@ -563,7 +556,7 @@
                 }
 
                 function enemyShoot(enemy) {
-                    var bullet = {};
+                    /*var bullet = {};
                     bullet.type = "bullet";
                     bullet.x = enemy.x + enemy.Width()/2;
                     bullet.y = enemy.y + enemy.Height()/2;
@@ -595,7 +588,8 @@
                         bullet.y += bullet.vy;
                         if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
                             this.dead = true;                        }
-                    };                    
+                    };*/
+                    var bullet = new Bullet(enemy);                    
                     bullets.push(bullet);
                     bullet.Draw = drawBullet;
                     bullet.owner = "enemy";
