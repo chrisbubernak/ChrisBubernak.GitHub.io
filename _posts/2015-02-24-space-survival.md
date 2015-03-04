@@ -21,4 +21,4 @@ I began coding on the bus to work one day, in what was really more of just a "st
 
 I've added a few hours of work to polish it a bit since then, but for the most part it really all came together that first day and I have to say, it feels great. I highly recommend to anyone who ever finds themselves in a similar situation to just set aside your normal project(s) for a few hours/days, work on something totally different and then step back from your keyboard and marvel at how awesome you are! 
 
-Anyways, you can play the game [here](/space/) and check out the source code on [github](https://github.com/chrisbubernak/ChrisBubernak.GitHub.io/tree/master/demos/space). Fair warning: the game is pretty challenging, if you can beat my current high score of 29 I'll be impressed!
+Anyways, you can play the game [here](/space/) and check out the source code on [github](https://github.com/chrisbubernak/ChrisBubernak.GitHub.io/tree/master/demos/space). Fair warning: the game is pretty challenging, if you can beat my current high score of <s>29</s> 67 I'll be impressed!
