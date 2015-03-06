@@ -1,15 +1,21 @@
 /// <reference path="game.ts" />
+
 class GameObject {
 	protected type: string;
     protected collided: boolean = false;
     protected x: number;
     protected y: number;
-    protected vX: number;
-    protected vY: number;
+    protected vX: number = 0;
+    protected vY: number = 0;
+    protected aX: number = 0;
+    protected aY: number = 0;
     protected dead: boolean = false;
     protected owner: string;
     protected width: number;
     protected height: number;
+    protected bounces: boolean = false;
+    protected isDead: boolean = false;
+    protected color: string = "black";
 
     public Width() {
     	return this.width * Game.BoxWidth();
@@ -36,6 +42,24 @@ class GameObject {
     }
 
     public Draw() {
-    	alert("Draw NOT IMPLEMENTED FOR " + this.type);
+        Game.ctx.fillStyle = this.color;
+        Game.ctx.rect(this.x, this.y, this.Width(), this.Height());    
+        Game.ctx.stroke();
+    }
+    
+    public Bounces() {
+        return this.bounces;
+    }
+
+    public IsDead() {
+        return this.isDead;
+    }
+
+    public Y() {
+        return this.y;
+    }
+
+    public X(){
+        return this.x;
     }
 }

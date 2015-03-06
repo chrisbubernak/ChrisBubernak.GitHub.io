@@ -11,7 +11,7 @@ var Bullet = (function (_super) {
     function Bullet(shooter) {
         _super.call(this);
         this.type = Bullet.BULLET_TYPE;
-        this.owner = shooter.Type();
+        this.owner = shooter.Id();
         this.x = shooter.x + shooter.Width() / 2;
         this.y = shooter.y + shooter.Height() / 2;
         this.width = Bullet.BULLET_WIDTH;
@@ -21,6 +21,7 @@ var Bullet = (function (_super) {
         var mag = Math.sqrt(dX * dX + dY * dY);
         this.vY = (-dY / mag) * Bullet.BULLET_SPEED;
         this.vX = (-dX / mag) * Bullet.BULLET_SPEED;
+        this.bounces = true;
     }
     Bullet.prototype.Collides = function (obj) {
         if (obj.Type() === "platform" && !this.collided) {
@@ -41,6 +42,10 @@ var Bullet = (function (_super) {
         if (this.x > Game.GameWidth() || this.x < 0 || this.y > Game.GameHeight() || this.y < 0) {
             this.dead = true;
         }
+    };
+    Bullet.prototype.Draw = function () {
+        Game.ctx.fillStyle = Bullet.BULLET_COLOR;
+        Game.ctx.fillRect(this.x, this.y, this.Width(), this.Height());
     };
     Bullet.BULLET_COLOR = "blue";
     Bullet.BULLET_WIDTH = .1;

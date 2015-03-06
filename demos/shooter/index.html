@@ -48,12 +48,16 @@
         </div>
         <div id="instructions">
         </div>
+        <script src="game.js"></script>
+        <script src="gameObject.js"></script>
+        <script src="bullet.js"></script>
+        <script src="player.js"></script>
         <script>
             (function() {
                 // consts
-                var NUM_COLS = 20;
-                var NUM_ROWS = 20;
-                var ENEMY_WIDTH = .6;
+                //var NUM_COLS = 20;
+                //var NUM_ROWS = 20;
+                /*var ENEMY_WIDTH = .6;
                 var ENEMY_HEIGHT = 1.5;
                 var ENEMY_SPEED = 3;
                 //var BULLET_WIDTH = .1;
@@ -64,29 +68,25 @@
                 //var BULLET_COLOR = "blue";
                 var BLOOD_COLOR = "red";
                 var PLATFORM_COLOR = "black";
-                var FPS = 60;
-                var PLAYER_WIDTH = .6;
-                var PLAYER_HEIGHT = 1.5;
-                var PLAYER_SPEED = 3;
+                //var PLAYER_WIDTH = .6;
+                //ar PLAYER_HEIGHT = 1.5;
+                //var PLAYER_SPEED = 3;
                 var GUN_LENGTH = 15; 
                 var TEXT_COLOR = "black";
                 var STARTING_X = 50;
                 var STARTING_Y = 200;
                 var CHANCE_ADD_ENEMY = .995;
                 var CHANCE_ENEMY_SHOOT = .99;
-                var GRAVITY = 1;
-                var MASS = 1;
-                var FRICTION = .5;
-                var MAX_SPEED = 10;
+                //var GRAVITY = 1;
+                //var MASS = 1;
+                //var FRICTION = .5;
+                //fvar MAX_SPEED = 10;
                 var JUMP_VELOCITY = .5;
                 var PLATFORM_HEIGHT = .25
-                var NUM_BLOODS = 20;
+                var NUM_BLOODS = 20;*/
+                var FPS = 60;
 
                 // globals
-                var gameHeight = window.innerHeight;
-                var gameWidth = window.innerWidth;
-                var boxWidth = gameWidth / NUM_COLS;
-                var boxHeight = gameHeight / NUM_ROWS;
                 var kills;
                 var mouseX;
                 var mouseY;
@@ -103,124 +103,34 @@
                 var platforms = [];
                 // setup event listeners
                 document.onmousemove = mouseMove;
-                document.onmouseup = shoot;
+                document.onmouseup = function() {console.log("shoot");};
                 window.addEventListener('keyup', function (event) { Key.onKeyup(event); }, false);
                 window.addEventListener('keydown', function (event) { Key.onKeydown(event); }, false);
-                document.getElementById('startMenu').onclick = function() { start(); };
+                document.getElementById('startMenu').onclick = function() { start(); };       
 
-                var Person = {
-                    type: "player",
-                    x: STARTING_X,
-                    y: STARTING_Y,
-                    width: PLAYER_WIDTH,
-                    height: PLAYER_HEIGHT,
-                    speed: PLAYER_SPEED,
-                    vX: 0,
-                    vY: 0,
-                    aX: 0,
-                    aY: GRAVITY,
-                    mass: MASS,
-                    jumping: false,
-                    crouching: false,
-                    bounce: false,
-                    color: ENEMY_COLOR,
-                    Width: function() {  
-                        return boxWidth * this.width;
-                    }, 
-                    Height: function() {
-                        if (this.crouching) {
-                            return boxHeight * this.height / 2;
-                        } 
-                        return boxHeight * this.height;
-                    },
-                    Collides: function(obj) {
-                    	if (obj.type === "bullet" && obj.owner !== this.type) {
-                    		end();
-                    	} else if (obj.type === "platform" && !this.collided) {
-                    		this.collided = true;
-							var goingUp = player.vY < 0;
-                            if (!goingUp) {
-                                // player is above the platform
-                                player.y = obj.y - player.Height();
-                                player.vY = 0;
-                                player.jumping = false;
-                            } else if (goingUp){
-                                // player is below the platform
-                                player.vY = 0;
-                                player.y = obj.y + obj.Height();
-                            }
-						}         
-   		        	},
-                    Move: function() {
-                    	player.crouching = false;
-                    	player.collided = false;
-	                    if (Key.isDown(Key.UP)) jump(player);
-	                    if (Key.isDown(Key.LEFT)) moveLeft(player);
-	                    if (Key.isDown(Key.RIGHT)) moveRight(player);
-	                    if (Key.isDown(Key.DOWN)) crouch(player);
-
-	                    player.vY += player.aY;
-	                    player.y += player.vY;
-	                    if (player.y + player.Height() >= gameHeight) {
-	                        player.y = gameHeight - player.Height();
-	                        // want normal force to dwcancel gravity!
-	                        player.vY = 0; 
-	                        player.jumping = false;
-	                    }
-
-	                    if (player.vX !== 0) {
-	                        player.aX = player.vX > 0 ? -FRICTION * MASS : FRICTION * MASS;
-	                    } else {
-	                        player.aX = 0;
-	                    }
-
-	                    player.vX += player.aX;
-	                    if (Math.abs(player.vX) > MAX_SPEED) {
-	                        player.vX = player.vX > 0 ? MAX_SPEED : -MAX_SPEED;
-	                    }
-	                    player.x += player.vX;
-
-	                    if (player.x > gameWidth - player.Width()) {
-	                        player.x = gameWidth - player.Width();
-	                        player.vX = 0;
-	                        player.aX = 0;
-	                    }
-	                    if (player.x < 0) {
-	                        player.vX = 0;
-	                        player.aX = 0;
-	                        player.x = 0;
-	                    }
-
-	                    updateGun(player, player.gun);
-                    },
-                    Draw: drawPerson
-
-                };                
+                Game.ctx = ctx;
 
                 // start the game!
                 start();
 
                 function start() {
                 	platforms = [];
-                    var platformLocs = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
+                    /*var platformLocs = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
                     for (var i = 0; i < platformLocs.length; i++) {
                         addPlatform(platformLocs[i]);
-                    }
+                    }*/
 
                     hideStartMenu();
-                    kills = 0;
                     mouseX = 0;
                     mouseY = 0;
                     bullets = [];
                     enemies = [];
-                    hit = false;
-                    player = Object.create(Person);
-                    player.gun = {};
-                    player.color = PLAYER_COLOR;
+                    //hit = false;
+                    player = new Player("User", 100, 100);
+                    enemies.push(new Player("Enemy", 200, 200));
+                    //player.gun = {};
+                    //player.color = PLAYER_COLOR;
                     timer = setInterval(run, 1000/FPS);
-
-                    canvas.width = gameWidth;
-                    canvas.height = gameHeight;
                 }
 
                 function end() {
@@ -238,10 +148,10 @@
                     // update canvas size (window size could have changed!)
                     gameHeight = window.innerHeight;
                     gameWidth = window.innerWidth;
-                    boxWidth = gameWidth / NUM_COLS;
-                    boxHeight = gameHeight / NUM_ROWS;
-                    canvas.width = gameWidth;
-                    canvas.height = gameHeight;
+                    boxWidth = Game.BoxWidth();
+                    boxHeight = Game.BoxHeight();
+                    canvas.width = Game.GameWidth();
+                    canvas.height = Game.GameHeight();
                     ctx.clearRect(0, 0, gameWidth, gameHeight);    
 
                     var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
@@ -251,15 +161,66 @@
                     }
                 }
 
-                function drawBlood() {
-                    ctx.fillStyle = BLOOD_COLOR;
-                    ctx.fillRect(this.x + this.Width()/2, this.y + this.Height()/2, this.Width(), this.Height());
+                function update() {
+                	if (Key.isDown(Key.UP)) player.Jump();
+        			if (Key.isDown(Key.LEFT)) player.MoveLeft();
+        			if (Key.isDown(Key.RIGHT)) player.MoveRight();
+        			if (Key.isDown(Key.DOWN)) player.Crouch();
+		
+                	// do any modifications to environment...add enemies for example!
+                    //if (Math.random() > CHANCE_ADD_ENEMY) {
+                     //   addEnemy();
+                    //}
+
+                    var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
+
+                    // positional logic
+                    for (var o = 0; o < gameObjects.length; o++) {
+                    	gameObjects[o].Move();
+                    }
+
+                    // get collisions
+                    var collisions = [];
+                    for (var i = 0; i < gameObjects.length; i++) {
+                        for (var j = 0; j < gameObjects.length; j++) {
+                            if (i !== j && collides(gameObjects[i], gameObjects[j])) {
+                                collisions.push([i, j]);
+                            }
+                        }
+                    }
+
+                    // collision resolution
+                    for (var c = 0; c < collisions.length; c++) {
+                    	var obj1Index = collisions[c][0];
+                    	var obj2Index = collisions[c][1];
+                    	gameObjects[obj1Index].Collides(gameObjects[obj2Index]);
+                    }
+
+                    // remove dead things
+                    var e = enemies.length;
+                    while(e--) {
+                    	if (enemies[e].dead) {
+                    		enemies.splice(e, 1);
+                    	}
+                    }
+
+                    var b = bullets.length;
+                    while(b--) {
+                    	if (bullets[b].dead) {
+                    		bullets.splice(b, 1);
+                    	}
+                    }
                 }
 
-                function drawBullet() {
-                    var bullet = this;
-                    ctx.fillStyle = BULLET_COLOR;
-                    ctx.fillRect(bullet.x + bullet.Width()/2, bullet.y + bullet.Height()/2, bullet.Width(), bullet.Height());
+                function mouseMove(e) {
+                    var event = e || window.e;
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+                }
+
+                /*function drawBlood() {
+                    ctx.fillStyle = BLOOD_COLOR;
+                    ctx.fillRect(this.x + this.Width()/2, this.y + this.Height()/2, this.Width(), this.Height());
                 }
 
                 function drawGrid() {
@@ -340,9 +301,9 @@
 
                 function update() {
                 	// do any modifications to environment...add enemies for example!
-                    if (Math.random() > CHANCE_ADD_ENEMY) {
-                        addEnemy();
-                    }
+                    //if (Math.random() > CHANCE_ADD_ENEMY) {
+                     //   addEnemy();
+                    //}
 
                     var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
 
@@ -496,14 +457,8 @@
                     //}
                 }
 
-                function mouseMove(e) {
-                    var event = e || window.e;
-                    mouseX = event.clientX;
-                    mouseY = event.clientY;
-                }
-
                 function shoot() {
-                    var bullet = {};
+                    /*var bullet = {};
                     bullet.type = "bullet";
                     bullet.width = BULLET_WIDTH;
                     bullet.height = BULLET_HEIGHT;
@@ -540,6 +495,7 @@
                             this.dead = true;
                         }
                     }
+                    var bullet = new Bullet(player);
                     bullets.push(bullet);
                 }
 
@@ -588,7 +544,7 @@
                         bullet.y += bullet.vy;
                         if (bullet.x > gameWidth || bullet.x < 0 || bullet.y > gameHeight || bullet.y < 0) {
                             this.dead = true;                        }
-                    };*/
+                    };
                     var bullet = new Bullet(enemy);                    
                     bullets.push(bullet);
                     bullet.Draw = drawBullet;
@@ -674,7 +630,7 @@
                         }
                         bloods.push(blood);
                     }
-                }
+                }*/
 
                 function collides(obj1, obj2) {
                     if ((obj1.x < obj2.x + obj2.Width()) &&

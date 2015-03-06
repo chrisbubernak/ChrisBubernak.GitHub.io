@@ -8,10 +8,11 @@ class Bullet extends GameObject {
     private static BULLET_SPEED: number = 6;
     private static BULLET_TYPE: string = "bullet";
 
+
     constructor(shooter) {
     	super();
     	this.type = Bullet.BULLET_TYPE;
-    	this.owner = shooter.Type();
+    	this.owner = shooter.Id();
         this.x = shooter.x + shooter.Width()/2;
         this.y = shooter.y + shooter.Height()/2;
         this.width = Bullet.BULLET_WIDTH;
@@ -21,6 +22,7 @@ class Bullet extends GameObject {
         var mag = Math.sqrt(dX*dX + dY * dY);
         this.vY = (-dY/mag) * Bullet.BULLET_SPEED;
         this.vX = (-dX/mag) * Bullet.BULLET_SPEED;
+        this.bounces = true;
     }
 
     public Collides(obj) {
@@ -43,5 +45,10 @@ class Bullet extends GameObject {
         if (this.x > Game.GameWidth() || this.x < 0 || this.y > Game.GameHeight() || this.y < 0) {
             this.dead = true;                        
         }
-    }  
+    } 
+
+    public Draw() {
+        Game.ctx.fillStyle = Bullet.BULLET_COLOR;
+        Game.ctx.fillRect(this.x, this.y, this.Width(), this.Height());   
+    }
 }
