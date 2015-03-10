@@ -1,5 +1,6 @@
 /// <reference path="game.ts" />
 /// <reference path="gameObject.ts" />
+/// <reference path="platform.ts" />
 
 class Bullet extends GameObject {
 	private static BULLET_COLOR: string = "blue";
@@ -30,7 +31,7 @@ class Bullet extends GameObject {
     		this.collided = true;
     		this.owner = "";
     		this.vY *= -1;
-    	} else if (obj.Id() === this.owner || obj.Owner() === this.owner || obj.Type() === Platform.Type) {
+    	} else if (obj.Id() === this.owner || obj.Owner() === this.owner || obj.Type() === Platform.TYPE) {
     		//no op if we hit our owner or another of our own bullets
     	} 
     	else {

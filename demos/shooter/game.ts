@@ -1,10 +1,12 @@
 /// <reference path="gameObject.ts" />
+/// <reference path="blood.ts" />
 
 class Game {
 	private static GRAVITY: number = 1;
 	private static NUM_COLS: number = 20;
 	private static NUM_ROWS: number = 20;
 	private static FRICTION: number = .5;
+	private static NUM_BLOODS: number = 20;
 
 	private static gameWidth: number;
 	private static gameHeight: number;
@@ -28,7 +30,13 @@ class Game {
 	public static RemoveDeadObjects() {
 		var o = Game.gameObjects.length;
         while(o--) {
-        	if(Game.gameObjects[o].IsDead()) {
+        	var obj = Game.gameObjects[o];
+        	if(obj.IsDead()) {
+        		if (obj.Bleeds()) {
+        			for (var i = 0; i < Game.NUM_BLOODS; i++) {
+        				Game.gameObjects.push(new Blood(obj.X(), obj.Y()));
+        			}
+        		}
         		Game.gameObjects.splice(o, 1);
         	}
         }
@@ -81,5 +89,11 @@ class Game {
 	public static NumRows() {
 		return Game.NUM_ROWS;
 	}
+
+    public static GetLoc(obj) {
+    	var col = Math.floor(Game.NUM_COLS * ((obj.X() + obj.Width()/2)/Game.GameWidth()));
+    	var row = Math.floor(Game.NUM_ROWS * ((obj.Y() + obj.Height()/2)/Game.GameHeight()));
+		return row * Game.NUM_COLS + col;
+    }
 
 }

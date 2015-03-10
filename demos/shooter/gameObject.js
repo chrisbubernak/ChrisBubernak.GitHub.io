@@ -9,6 +9,7 @@ var GameObject = (function () {
         this.dead = false;
         this.bounces = false;
         this.color = "black";
+        this.bleeds = false;
         Game.AddGameObject(this);
     }
     GameObject.prototype.Width = function () {
@@ -38,6 +39,9 @@ var GameObject = (function () {
     GameObject.prototype.Bounces = function () {
         return this.bounces;
     };
+    GameObject.prototype.Bleeds = function () {
+        return this.bleeds;
+    };
     GameObject.prototype.IsDead = function () {
         return this.dead;
     };
@@ -46,6 +50,9 @@ var GameObject = (function () {
     };
     GameObject.prototype.X = function () {
         return this.x;
+    };
+    GameObject.prototype.Id = function () {
+        return this.id;
     };
     return GameObject;
 })();

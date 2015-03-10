@@ -15,6 +15,8 @@ class GameObject {
     protected height: number;
     protected bounces: boolean = false;
     protected color: string = "black";
+    protected id: string;
+    protected bleeds: boolean = false;
 
     constructor() {
         Game.AddGameObject(this);
@@ -55,6 +57,10 @@ class GameObject {
         return this.bounces;
     }
 
+    public Bleeds() {
+        return this.bleeds;
+    }
+
     public IsDead() {
         return this.dead;
     }
@@ -65,5 +71,9 @@ class GameObject {
 
     public X(){
         return this.x;
+    }
+
+    public Id() {
+        return this.id;
     }
 }

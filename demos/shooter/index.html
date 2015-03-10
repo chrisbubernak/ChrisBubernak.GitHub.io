@@ -53,6 +53,8 @@
         <script src="bullet.js"></script>
         <script src="player.js"></script>
         <script src="platform.js"></script>
+        <script src="blood.js"></script>
+
         <script>
             (function() {
                 // consts
@@ -591,49 +593,7 @@
                     enemies.push(enemy);
                 }
 
-                function addPlatform(loc) {
-                    var platform = {};
-                    platform.type = "platform";
-                    var row = loc % NUM_COLS;
-                    var col = Math.floor(loc/NUM_COLS);
-                    var x = row * gameWidth / NUM_COLS;
-                    var y = (col + 1) * gameHeight / NUM_ROWS;
-                    platform.color = PLATFORM_COLOR;
-                    platform.x = x;
-                    platform.y = y; 
-                    platform.Height = function() { return boxHeight * PLATFORM_HEIGHT; };
-                    platform.Width = function () { return gameWidth/NUM_COLS; };
-                    platform.Collides = function(obj) { return; }; // this is just a no-op!
-                    platform.Draw = drawPlatform;
-                    platform.Move = function() {}; // no op!
-                    platforms.push(platform);
-                }
-
-                function addBloods(x, y) {
-                    for (var i = 0; i < NUM_BLOODS; i++) {
-                        var blood = {
-                            type: "blood",
-                            x: x,
-                            y: y,
-                            vX: Math.random() * boxWidth/8 - boxWidth/16,
-                            vY: -Math.random() * JUMP_VELOCITY * boxHeight,
-                            aY: GRAVITY,
-                            Width: function() { return BULLET_WIDTH * boxWidth},
-                            Height: function() { return BULLET_HEIGHT * boxHeight},
-                            Draw: drawBlood,
-                            Collides: function() { return; }, //no op!
-                            Move: function() {
-                            	this.vY += this.aY;
-		                        this.x += this.vX;
-		                        this.y += this.vY;
-		                        if (this.x > gameWidth || this.x < 0 || this.y > gameHeight || this.y < 0) {
-		                            this.dead = true;
-		                        }
-                            }
-                        }
-                        bloods.push(blood);
-                    }
-                }*/
+                */
 
                 function collides(obj1, obj2) {
                     if ((obj1.x < obj2.x + obj2.Width()) &&
@@ -673,7 +633,7 @@
 
                     onKeyup: function (event) {
                         if (event.keyCode === this.SPECIAL) {
-                            special();
+                            player.DropPlatform(Game.GetLoc(player));
                         } else {
                             delete this._pressed[event.keyCode];
                         }

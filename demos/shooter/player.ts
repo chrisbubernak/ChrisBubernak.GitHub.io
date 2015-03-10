@@ -9,8 +9,7 @@ class Player extends GameObject{
     private static SPEED: number = 2;
     private static TYPE: string = "player";
     private static MAX_SPEED: number = 10;
-    private static JUMP_VELOCITY: number = .5;
-    private id: string;
+    private static JUMP_VELOCITY: number = .6;
 
     private jumping: boolean = false;
     private crouching: boolean = false;
@@ -25,6 +24,7 @@ class Player extends GameObject{
         this.height = Player.HEIGHT;
         this.aY = Game.Gravity();
         this.color = Player.COLOR;
+        this.bleeds = true;
     }	
 
     public Id() {
@@ -42,9 +42,9 @@ class Player extends GameObject{
 		return Game.BoxHeight() * this.height;
 	}
     public Collides(obj) {
-    	if (obj.Type() === Bullet.Type && obj.Owner() !== this.id) {
+    	if (obj.Type() === Bullet.TYPE && obj.Owner() !== this.id) {
     		this.dead = true;
-    	} else if (obj.Type() === Platform.Type && !this.collided) {
+    	} else if (obj.Type() === Platform.TYPE && !this.collided) {
     		this.collided = true;
 			var goingUp = this.vY < 0;
             if (!goingUp) {
@@ -127,5 +127,9 @@ class Player extends GameObject{
     		this.jumping = true;
     		this.vY = -Player.JUMP_VELOCITY * Game.BoxHeight();
     	}
+    }
+
+    public DropPlatform(loc) {
+    	Game.AddGameObject(new Platform(loc));
     }
 }   

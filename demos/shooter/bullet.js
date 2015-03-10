@@ -1,5 +1,6 @@
 /// <reference path="game.ts" />
 /// <reference path="gameObject.ts" />
+/// <reference path="platform.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -10,7 +11,7 @@ var Bullet = (function (_super) {
     __extends(Bullet, _super);
     function Bullet(shooter) {
         _super.call(this);
-        this.type = Bullet.BULLET_TYPE;
+        this.type = Bullet.TYPE;
         this.owner = shooter.Id();
         this.x = shooter.X() + shooter.Width() / 2;
         this.y = shooter.Y() + shooter.Height() / 2;
@@ -29,7 +30,7 @@ var Bullet = (function (_super) {
             this.owner = "";
             this.vY *= -1;
         }
-        else if (obj.Id() === this.owner || obj.Owner() === this.owner || obj.Type() === "platform") {
+        else if (obj.Id() === this.owner || obj.Owner() === this.owner || obj.Type() === Platform.TYPE) {
         }
         else {
             this.dead = true;
@@ -51,6 +52,6 @@ var Bullet = (function (_super) {
     Bullet.BULLET_WIDTH = .1;
     Bullet.BULLET_HEIGHT = .1;
     Bullet.BULLET_SPEED = 6;
-    Bullet.BULLET_TYPE = "bullet";
+    Bullet.TYPE = "bullet";
     return Bullet;
 })(GameObject);

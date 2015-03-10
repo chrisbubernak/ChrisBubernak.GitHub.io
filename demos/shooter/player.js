@@ -21,6 +21,7 @@ var Player = (function (_super) {
         this.height = Player.HEIGHT;
         this.aY = Game.Gravity();
         this.color = Player.COLOR;
+        this.bleeds = true;
     }
     Player.prototype.Id = function () {
         return this.id;
@@ -35,10 +36,10 @@ var Player = (function (_super) {
         return Game.BoxHeight() * this.height;
     };
     Player.prototype.Collides = function (obj) {
-        if (obj.Type() === "bullet" && obj.Owner() !== this.id) {
+        if (obj.Type() === Bullet.TYPE && obj.Owner() !== this.id) {
             this.dead = true;
         }
-        else if (obj.Type() === "platform" && !this.collided) {
+        else if (obj.Type() === Platform.TYPE && !this.collided) {
             this.collided = true;
             var goingUp = this.vY < 0;
             if (!goingUp) {
@@ -113,12 +114,15 @@ var Player = (function (_super) {
             this.vY = -Player.JUMP_VELOCITY * Game.BoxHeight();
         }
     };
+    Player.prototype.DropPlatform = function (loc) {
+        Game.AddGameObject(new Platform(loc));
+    };
     Player.COLOR = "green";
     Player.WIDTH = .6;
     Player.HEIGHT = 1.5;
     Player.SPEED = 2;
     Player.TYPE = "player";
     Player.MAX_SPEED = 10;
-    Player.JUMP_VELOCITY = .5;
+    Player.JUMP_VELOCITY = .6;
     return Player;
 })(GameObject);
