@@ -14,8 +14,11 @@ class GameObject {
     protected width: number;
     protected height: number;
     protected bounces: boolean = false;
-    protected isDead: boolean = false;
     protected color: string = "black";
+
+    constructor() {
+        Game.AddGameObject(this);
+    }
 
     public Width() {
     	return this.width * Game.BoxWidth();
@@ -34,17 +37,18 @@ class GameObject {
     }
 
     public Collides(obj) {
-    	alert("COLLIDES NOT IMPLEMENTED FOR " + this.type);
     }
 
     public Move() {
-    	alert("COLLIDES NOT IMPLEMENTED FOR " + this.type);
     }
 
     public Draw() {
         Game.ctx.fillStyle = this.color;
         Game.ctx.rect(this.x, this.y, this.Width(), this.Height());    
         Game.ctx.stroke();
+        if (this.type === "bullet") {
+            console.log(this.x + " " + this.Width()); 
+        }
     }
     
     public Bounces() {
@@ -52,7 +56,7 @@ class GameObject {
     }
 
     public IsDead() {
-        return this.isDead;
+        return this.dead;
     }
 
     public Y() {

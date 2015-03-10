@@ -1,5 +1,6 @@
 /// <reference path="game.ts" />
 /// <reference path="gameObject.ts" />
+/// <reference path="bullet.ts" />
 
 class Player extends GameObject{
 	private static COLOR: string = "green";
@@ -41,9 +42,9 @@ class Player extends GameObject{
 		return Game.BoxHeight() * this.height;
 	}
     public Collides(obj) {
-    	if (obj.Type() === "bullet" && obj.Owner() !== this.id) {
-    		this.isDead = true;
-    	} else if (obj.Type() === "platform" && !this.collided) {
+    	if (obj.Type() === Bullet.Type && obj.Owner() !== this.id) {
+    		this.dead = true;
+    	} else if (obj.Type() === Platform.Type && !this.collided) {
     		this.collided = true;
 			var goingUp = this.vY < 0;
             if (!goingUp) {
@@ -94,6 +95,19 @@ class Player extends GameObject{
             this.x = 0;
         }
         // todo: updateGun(player, player.gun);
+    }
+
+    // todo: fix these!
+    public TargetX() {
+    	return Game.GetMouseX();
+    }
+
+    public TargetY() {
+    	return Game.GetMouseY();
+    }
+
+    public Shoot() {
+	    var bullet = new Bullet(this);
     }
 
     public MoveLeft() {

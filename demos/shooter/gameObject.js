@@ -8,8 +8,8 @@ var GameObject = (function () {
         this.aY = 0;
         this.dead = false;
         this.bounces = false;
-        this.isDead = false;
         this.color = "black";
+        Game.AddGameObject(this);
     }
     GameObject.prototype.Width = function () {
         return this.width * Game.BoxWidth();
@@ -24,21 +24,22 @@ var GameObject = (function () {
         return this.owner;
     };
     GameObject.prototype.Collides = function (obj) {
-        alert("COLLIDES NOT IMPLEMENTED FOR " + this.type);
     };
     GameObject.prototype.Move = function () {
-        alert("COLLIDES NOT IMPLEMENTED FOR " + this.type);
     };
     GameObject.prototype.Draw = function () {
         Game.ctx.fillStyle = this.color;
         Game.ctx.rect(this.x, this.y, this.Width(), this.Height());
         Game.ctx.stroke();
+        if (this.type === "bullet") {
+            console.log(this.x + " " + this.Width());
+        }
     };
     GameObject.prototype.Bounces = function () {
         return this.bounces;
     };
     GameObject.prototype.IsDead = function () {
-        return this.isDead;
+        return this.dead;
     };
     GameObject.prototype.Y = function () {
         return this.y;

@@ -52,6 +52,7 @@
         <script src="gameObject.js"></script>
         <script src="bullet.js"></script>
         <script src="player.js"></script>
+        <script src="platform.js"></script>
         <script>
             (function() {
                 // consts
@@ -103,7 +104,7 @@
                 var platforms = [];
                 // setup event listeners
                 document.onmousemove = mouseMove;
-                document.onmouseup = function() {console.log("shoot");};
+                document.onmouseup = function() {player.Shoot();};
                 window.addEventListener('keyup', function (event) { Key.onKeyup(event); }, false);
                 window.addEventListener('keydown', function (event) { Key.onKeydown(event); }, false);
                 document.getElementById('startMenu').onclick = function() { start(); };       
@@ -115,10 +116,10 @@
 
                 function start() {
                 	platforms = [];
-                    /*var platformLocs = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
+                    var platformLocs = [340, 341, 342, 324, 306, , 288, 335, 212, 210, 37, 42, 100, 105, 142, 145, 146, 213, 214, 215, 216, 217];
                     for (var i = 0; i < platformLocs.length; i++) {
-                        addPlatform(platformLocs[i]);
-                    }*/
+                        Game.AddGameObject(new Platform(platformLocs[i]));
+                    }
 
                     hideStartMenu();
                     mouseX = 0;
@@ -154,7 +155,7 @@
                     canvas.height = Game.GameHeight();
                     ctx.clearRect(0, 0, gameWidth, gameHeight);    
 
-                    var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
+                    var gameObjects = Game.GetGameObjects();
                     var o = gameObjects.length;
                     while(o--) {
                         gameObjects[o].Draw();
@@ -172,7 +173,7 @@
                      //   addEnemy();
                     //}
 
-                    var gameObjects = bloods.concat(enemies).concat([player]).concat(bullets).concat(platforms);
+                    var gameObjects = Game.GetGameObjects();
 
                     // positional logic
                     for (var o = 0; o < gameObjects.length; o++) {
@@ -197,7 +198,7 @@
                     }
 
                     // remove dead things
-                    var e = enemies.length;
+                    /*var e = enemies.length;
                     while(e--) {
                     	if (enemies[e].dead) {
                     		enemies.splice(e, 1);
@@ -209,13 +210,15 @@
                     	if (bullets[b].dead) {
                     		bullets.splice(b, 1);
                     	}
-                    }
+                    }*/
+                    Game.RemoveDeadObjects();
                 }
 
                 function mouseMove(e) {
                     var event = e || window.e;
-                    mouseX = event.clientX;
-                    mouseY = event.clientY;
+                    Game.SetMouseX(event.clientX);
+                    Game.SetMouseY(event.clientY);
+
                 }
 
                 /*function drawBlood() {

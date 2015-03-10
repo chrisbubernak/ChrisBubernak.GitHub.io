@@ -12,15 +12,15 @@ var Bullet = (function (_super) {
         _super.call(this);
         this.type = Bullet.BULLET_TYPE;
         this.owner = shooter.Id();
-        this.x = shooter.x + shooter.Width() / 2;
-        this.y = shooter.y + shooter.Height() / 2;
+        this.x = shooter.X() + shooter.Width() / 2;
+        this.y = shooter.Y() + shooter.Height() / 2;
         this.width = Bullet.BULLET_WIDTH;
         this.height = Bullet.BULLET_HEIGHT;
-        var dX = this.x - shooter.x;
-        var dY = this.y - shooter.y;
+        var dX = shooter.TargetX() - this.x;
+        var dY = shooter.TargetY() - this.y;
         var mag = Math.sqrt(dX * dX + dY * dY);
-        this.vY = (-dY / mag) * Bullet.BULLET_SPEED;
-        this.vX = (-dX / mag) * Bullet.BULLET_SPEED;
+        this.vY = (dY / mag) * Bullet.BULLET_SPEED;
+        this.vX = (dX / mag) * Bullet.BULLET_SPEED;
         this.bounces = true;
     }
     Bullet.prototype.Collides = function (obj) {
@@ -29,7 +29,7 @@ var Bullet = (function (_super) {
             this.owner = "";
             this.vY *= -1;
         }
-        else if (obj.Type() === this.owner || obj.Owner() === this.owner || obj.Type() === "platform") {
+        else if (obj.Id() === this.owner || obj.Owner() === this.owner || obj.Type() === "platform") {
         }
         else {
             this.dead = true;

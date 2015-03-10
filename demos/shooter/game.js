@@ -1,6 +1,33 @@
+/// <reference path="gameObject.ts" />
 var Game = (function () {
     function Game() {
     }
+    Game.AddGameObject = function (obj) {
+        Game.gameObjects.push(obj);
+    };
+    Game.GetGameObjects = function () {
+        return Game.gameObjects;
+    };
+    Game.RemoveDeadObjects = function () {
+        var o = Game.gameObjects.length;
+        while (o--) {
+            if (Game.gameObjects[o].IsDead()) {
+                Game.gameObjects.splice(o, 1);
+            }
+        }
+    };
+    Game.SetMouseX = function (x) {
+        Game.mouseX = x;
+    };
+    Game.GetMouseX = function () {
+        return Game.mouseX;
+    };
+    Game.SetMouseY = function (y) {
+        Game.mouseY = y;
+    };
+    Game.GetMouseY = function () {
+        return Game.mouseY;
+    };
     Game.BoxWidth = function () {
         return Game.boxWidth || window.innerWidth / Game.NUM_COLS;
     };
@@ -30,5 +57,8 @@ var Game = (function () {
     Game.NUM_COLS = 20;
     Game.NUM_ROWS = 20;
     Game.FRICTION = .5;
+    Game.mouseX = 0;
+    Game.mouseY = 0;
+    Game.gameObjects = [];
     return Game;
 })();

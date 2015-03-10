@@ -6,22 +6,22 @@ class Bullet extends GameObject {
 	private static BULLET_WIDTH: number = .1;
     private static BULLET_HEIGHT: number = .1;
     private static BULLET_SPEED: number = 6;
-    private static BULLET_TYPE: string = "bullet";
+    public static TYPE: string = "bullet";
 
 
     constructor(shooter) {
     	super();
-    	this.type = Bullet.BULLET_TYPE;
+    	this.type = Bullet.TYPE;
     	this.owner = shooter.Id();
-        this.x = shooter.x + shooter.Width()/2;
-        this.y = shooter.y + shooter.Height()/2;
+        this.x = shooter.X() + shooter.Width()/2;
+        this.y = shooter.Y() + shooter.Height()/2;
         this.width = Bullet.BULLET_WIDTH;
         this.height = Bullet.BULLET_HEIGHT;
-        var dX = this.x - shooter.x;
-        var dY = this.y - shooter.y;
+        var dX = shooter.TargetX() - this.x
+        var dY = shooter.TargetY() - this.y
         var mag = Math.sqrt(dX*dX + dY * dY);
-        this.vY = (-dY/mag) * Bullet.BULLET_SPEED;
-        this.vX = (-dX/mag) * Bullet.BULLET_SPEED;
+        this.vY = (dY/mag) * Bullet.BULLET_SPEED;
+        this.vX = (dX/mag) * Bullet.BULLET_SPEED;
         this.bounces = true;
     }
 
@@ -30,7 +30,7 @@ class Bullet extends GameObject {
     		this.collided = true;
     		this.owner = "";
     		this.vY *= -1;
-    	} else if (obj.Type() === this.owner || obj.Owner() === this.owner || obj.Type() === "platform") {
+    	} else if (obj.Id() === this.owner || obj.Owner() === this.owner || obj.Type() === Platform.Type) {
     		//no op if we hit our owner or another of our own bullets
     	} 
     	else {
@@ -49,6 +49,6 @@ class Bullet extends GameObject {
 
     public Draw() {
         Game.ctx.fillStyle = Bullet.BULLET_COLOR;
-        Game.ctx.fillRect(this.x, this.y, this.Width(), this.Height());   
+        Game.ctx.fillRect(this.x, this.y, this.Width(), this.Height());  
     }
 }

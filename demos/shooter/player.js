@@ -1,5 +1,6 @@
 /// <reference path="game.ts" />
 /// <reference path="gameObject.ts" />
+/// <reference path="bullet.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -35,7 +36,7 @@ var Player = (function (_super) {
     };
     Player.prototype.Collides = function (obj) {
         if (obj.Type() === "bullet" && obj.Owner() !== this.id) {
-            this.isDead = true;
+            this.dead = true;
         }
         else if (obj.Type() === "platform" && !this.collided) {
             this.collided = true;
@@ -86,6 +87,16 @@ var Player = (function (_super) {
             this.x = 0;
         }
         // todo: updateGun(player, player.gun);
+    };
+    // todo: fix these!
+    Player.prototype.TargetX = function () {
+        return Game.GetMouseX();
+    };
+    Player.prototype.TargetY = function () {
+        return Game.GetMouseY();
+    };
+    Player.prototype.Shoot = function () {
+        var bullet = new Bullet(this);
     };
     Player.prototype.MoveLeft = function () {
         this.vX -= 1;
