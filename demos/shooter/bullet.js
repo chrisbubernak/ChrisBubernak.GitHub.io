@@ -13,8 +13,8 @@ var Bullet = (function (_super) {
         _super.call(this);
         this.type = Bullet.TYPE;
         this.owner = shooter.Id();
-        this.x = shooter.X() + shooter.Width() / 2;
-        this.y = shooter.Y() + shooter.Height() / 2;
+        this.x = shooter.GunX();
+        this.y = shooter.GunY();
         this.width = Bullet.BULLET_WIDTH;
         this.height = Bullet.BULLET_HEIGHT;
         var dX = shooter.TargetX() - this.x;

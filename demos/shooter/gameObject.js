@@ -29,12 +29,11 @@ var GameObject = (function () {
     GameObject.prototype.Move = function () {
     };
     GameObject.prototype.Draw = function () {
-        Game.ctx.fillStyle = this.color;
+        Game.ctx.beginPath();
+        Game.ctx.strokeStyle = this.color;
         Game.ctx.rect(this.x, this.y, this.Width(), this.Height());
         Game.ctx.stroke();
-        if (this.type === "bullet") {
-            console.log(this.x + " " + this.Width());
-        }
+        Game.ctx.closePath();
     };
     GameObject.prototype.Bounces = function () {
         return this.bounces;

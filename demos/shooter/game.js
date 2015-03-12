@@ -1,4 +1,5 @@
 /// <reference path="gameObject.ts" />
+/// <reference path="player.ts" />
 /// <reference path="blood.ts" />
 var Game = (function () {
     function Game() {
@@ -22,6 +23,15 @@ var Game = (function () {
                 Game.gameObjects.splice(o, 1);
             }
         }
+    };
+    Game.MouseUp = function () {
+        Game.mouseDown = false;
+    };
+    Game.MouseDown = function () {
+        Game.mouseDown = true;
+    };
+    Game.IsMouseDown = function () {
+        return Game.mouseDown;
     };
     Game.SetMouseX = function (x) {
         Game.mouseX = x;
@@ -65,6 +75,14 @@ var Game = (function () {
         var row = Math.floor(Game.NUM_ROWS * ((obj.Y() + obj.Height() / 2) / Game.GameHeight()));
         return row * Game.NUM_COLS + col;
     };
+    Game.GetEnemy = function (player) {
+        for (var i = 0; i < Game.gameObjects.length; i++) {
+            var object = Game.gameObjects[i];
+            if (object.Type() === Player.TYPE && object.Id() !== player.Id()) {
+                return object;
+            }
+        }
+    };
     Game.GRAVITY = 1;
     Game.NUM_COLS = 20;
     Game.NUM_ROWS = 20;
@@ -73,5 +91,6 @@ var Game = (function () {
     Game.mouseX = 0;
     Game.mouseY = 0;
     Game.gameObjects = [];
+    Game.mouseDown = false;
     return Game;
 })();

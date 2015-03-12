@@ -45,12 +45,11 @@ class GameObject {
     }
 
     public Draw() {
-        Game.ctx.fillStyle = this.color;
+        Game.ctx.beginPath();
+        Game.ctx.strokeStyle = this.color;
         Game.ctx.rect(this.x, this.y, this.Width(), this.Height());    
         Game.ctx.stroke();
-        if (this.type === "bullet") {
-            console.log(this.x + " " + this.Width()); 
-        }
+        Game.ctx.closePath();
     }
     
     public Bounces() {

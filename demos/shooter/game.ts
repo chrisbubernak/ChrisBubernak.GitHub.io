@@ -1,4 +1,5 @@
 /// <reference path="gameObject.ts" />
+/// <reference path="player.ts" />
 /// <reference path="blood.ts" />
 
 class Game {
@@ -15,6 +16,7 @@ class Game {
 	private static mouseX: number = 0;
 	private static mouseY: number = 0;
 	private static gameObjects: GameObject [] = [];
+	private static mouseDown: boolean = false;
 
 	// todo: refactor this out
 	public static ctx;
@@ -40,6 +42,18 @@ class Game {
         		Game.gameObjects.splice(o, 1);
         	}
         }
+	}
+
+	public static MouseUp() {
+		Game.mouseDown = false;
+	}
+
+	public static MouseDown() {
+		Game.mouseDown = true;
+	}
+
+	public static IsMouseDown() {
+		return Game.mouseDown;
 	}
 
 	public static SetMouseX(x) {
@@ -94,6 +108,15 @@ class Game {
     	var col = Math.floor(Game.NUM_COLS * ((obj.X() + obj.Width()/2)/Game.GameWidth()));
     	var row = Math.floor(Game.NUM_ROWS * ((obj.Y() + obj.Height()/2)/Game.GameHeight()));
 		return row * Game.NUM_COLS + col;
+    }
+
+    public static GetEnemy(player) {
+    	for (var i = 0; i < Game.gameObjects.length; i++) {
+    		var object = Game.gameObjects[i];
+    		if (object.Type() === Player.TYPE && object.Id() !== player.Id()) {
+    			return object;
+    		}
+    	}
     }
 
 }

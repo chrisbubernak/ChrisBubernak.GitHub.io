@@ -39,4 +39,3 @@ var Blood = (function (_super) {
     Blood.TYPE = "blood";
     return Blood;
 })(GameObject);
-//for (var i = 0; i < NUM_BLOODS; i++) {

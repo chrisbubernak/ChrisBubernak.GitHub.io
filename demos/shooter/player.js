@@ -1,6 +1,7 @@
 /// <reference path="game.ts" />
 /// <reference path="gameObject.ts" />
 /// <reference path="bullet.ts" />
+/// <reference path="gun.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -9,7 +10,7 @@ var __extends = this.__extends || function (d, b) {
 };
 var Player = (function (_super) {
     __extends(Player, _super);
-    function Player(id, x, y) {
+    function Player(id, x, y, logic) {
         _super.call(this);
         this.jumping = false;
         this.crouching = false;
@@ -22,6 +23,8 @@ var Player = (function (_super) {
         this.aY = Game.Gravity();
         this.color = Player.COLOR;
         this.bleeds = true;
+        this.gun = new Gun();
+        this.logic = logic;
     }
     Player.prototype.Id = function () {
         return this.id;
@@ -58,6 +61,22 @@ var Player = (function (_super) {
     Player.prototype.Move = function () {
         this.crouching = false;
         this.collided = false;
+        var inputs = this.logic.GetInput(this);
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs[i];
+            if (input === "U")
+                this.Jump();
+            if (input === "L")
+                this.MoveLeft();
+            if (input === "R")
+                this.MoveRight();
+            if (input === "D")
+                this.Crouch();
+            if (input === "S")
+                this.Shoot();
+        }
+        this.targetX = this.logic.GetMouseX(this);
+        this.targetY = this.logic.GetMouseY(this);
         this.vY += this.aY;
         this.y += this.vY;
         if (this.y + this.Height() >= Game.GameHeight()) {
@@ -87,14 +106,13 @@ var Player = (function (_super) {
             this.aX = 0;
             this.x = 0;
         }
-        // todo: updateGun(player, player.gun);
+        this.UpdateGun();
     };
-    // todo: fix these!
     Player.prototype.TargetX = function () {
-        return Game.GetMouseX();
+        return this.targetX;
     };
     Player.prototype.TargetY = function () {
-        return Game.GetMouseY();
+        return this.targetY;
     };
     Player.prototype.Shoot = function () {
         var bullet = new Bullet(this);
@@ -116,6 +134,72 @@ var Player = (function (_super) {
     };
     Player.prototype.DropPlatform = function (loc) {
         Game.AddGameObject(new Platform(loc));
+    };
+    Player.prototype.GunX = function () {
+        return this.gun.x3;
+    };
+    Player.prototype.GunY = function () {
+        return this.gun.y3;
+    };
+    Player.prototype.Draw = function () {
+        // O
+        // -+-
+        // /\
+        Game.ctx.beginPath();
+        Game.ctx.strokeStyle = this.color;
+        // head
+        Game.ctx.arc(this.x + this.Width() / 2, this.y + this.Height() / 4, this.Height() / 4, 0, 2 * Math.PI, false);
+        // torso
+        Game.ctx.moveTo(this.x + this.Width() / 2, this.y + this.Height() / 2);
+        Game.ctx.lineTo(this.x + this.Width() / 2, this.y + this.Height() * (3 / 4));
+        // legs
+        Game.ctx.lineTo(this.x, this.y + this.Height());
+        Game.ctx.moveTo(this.x + this.Width() / 2, this.y + this.Height() * (3 / 4));
+        Game.ctx.lineTo(this.x + this.Width(), this.y + this.Height());
+        // arm(s)
+        var armStartX = this.x + this.Width() * (1 / 2);
+        var armStartY = this.y + this.Height() * (2 / 3);
+        Game.ctx.moveTo(armStartX, armStartY);
+        var dX = armStartX - this.TargetX();
+        var dY = armStartY - this.TargetY();
+        var mag = Math.sqrt(dX * dX + dY * dY);
+        var handYOffset = (-dY / mag) * this.Width() / 2;
+        var handXOffset = (-dX / mag) * this.Width() / 2;
+        var handY = armStartY + handYOffset;
+        var handX = armStartX + handXOffset;
+        Game.ctx.lineTo(handX, handY);
+        Game.ctx.closePath();
+        Game.ctx.stroke();
+        Game.ctx.beginPath();
+        Game.ctx.moveTo(this.gun.x1, this.gun.y1);
+        Game.ctx.lineTo(this.gun.x2, this.gun.y2);
+        Game.ctx.lineTo(this.gun.x3, this.gun.y3);
+        Game.ctx.stroke();
+        Game.ctx.closePath();
+    };
+    Player.prototype.UpdateGun = function () {
+        var armStartX = this.x + this.Width() / 2;
+        var armStartY = this.y + this.Height() * (2 / 3);
+        var dX;
+        var dY;
+        dX = armStartX - this.TargetX();
+        dY = armStartY - this.TargetY();
+        var mag = Math.sqrt(dX * dX + dY * dY);
+        var handYOffset = (-dY / mag) * this.Width() / 2;
+        var handXOffset = (-dX / mag) * this.Width() / 2;
+        var handY = armStartY + handYOffset;
+        var handX = armStartX + handXOffset;
+        this.gun.x1 = handX;
+        this.gun.y1 = handY;
+        var gunHeight = this.Height() / 4;
+        var tan = gunHeight / this.Width();
+        var NEG = handXOffset > 0 ? 1 : -1;
+        this.gun.x2 = handX - (tan * (NEG * (armStartY - handY)));
+        this.gun.y2 = handY - (tan * (-NEG * (armStartX - handX)));
+        var gunLength = this.Width() / 2;
+        var tan2 = gunLength / gunHeight;
+        this.gun.x3 = this.gun.x2 - (tan2 * (-NEG * (handY - this.gun.y2)));
+        this.gun.y3 = this.gun.y2 - (tan2 * (NEG * (handX - this.gun.x2)));
     };
     Player.COLOR = "green";
     Player.WIDTH = .6;
