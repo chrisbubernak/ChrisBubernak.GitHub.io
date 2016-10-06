@@ -301,7 +301,13 @@ permalink: /space/
                                 }
                             }
                             if (collides(enemy, player)) {
-                                end();
+                                if (shieldOn) {
+                                    kills++;
+                                    enemies.splice(e, 1);
+                                }
+                                else {
+                                    end();
+                                }
                             }
                         } 
 
