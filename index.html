@@ -1,25 +1,64 @@
-<!--
----
-layout: default
----
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+        function playNZ(){
+            var url = "https://www.youtube.com/watch?v=6FiXyPUkJpE";
+        }
 
-<div class="home">
+        function lightbox_open() {
+        var lightBoxVideo = document.getElementById("VisaChipCardVideo");
+        window.scrollTo(0, 0);
+        document.getElementById('light').style.display = 'block';
+        document.getElementById('fade').style.display = 'block';
+        lightBoxVideo.play();
+        }
 
-  <div class="posts">
-    {% for post in paginator.posts %}
-      <div class="post">
-        <a href="{{ post.url | prepend: site.baseurl }}" class="post-link">
-          <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p>
-          <h3 class="h2 post-title">{{ post.title }}</h3>
-          <p class="post-summary">{{ post.summary }}</p>
-        </a>
-      </div>
-    {% endfor %}
-  </div>
+        function lightbox_close() {
+        var lightBoxVideo = document.getElementById("VisaChipCardVideo");
+        document.getElementById('light').style.display = 'none';
+        document.getElementById('fade').style.display = 'none';
+        lightBoxVideo.pause();
+        }
 
-  {% include pagination.html %}
-</div>
--->
-<div>
-  <h3>Chris Bubernak</h3>
-</div>
+    </script>
+</head>
+<body>
+    <div class="content">
+        chris bubernak
+        <hr/>
+        <div class="grid-container">
+            <div>
+                <div>
+                    <iframe src="http://ern.dog/" frameborder="0"></iframe>
+                </div>
+                ern.dog
+            </div>
+            <div>
+                <div>
+                    <video controls>
+                        <source src="https://www.youtube.com/watch?v=6FiXyPUkJpE4" type="video/mp4">
+                    </video>
+                </div>
+                new zealand / australia
+            </div>
+            <div>
+                <div>
+                    <iframe src="demos/space.html" frameborder="0"></iframe>
+                </div>
+                space
+            </div>
+            <div>
+                <div>
+                    <video controls>
+                        <source src="https://www.youtube.com/watch?v=r1ZxsareBWs" type="video/mp4">
+                    </video>
+                </div>
+                taiwan
+            </div>
+        </div>
+        <hr/>
+        <div class="footer">
+            - 2020 -  
+        </div>
+    </div>
+</body>
