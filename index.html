@@ -1,39 +1,80 @@
-<head>
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-    <div class="content">
-        chris bubernak
-        <hr/>
-        <div class="grid-container">
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/icon" href="logo.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chris Bubernak</title>
+        <style>  
+            body {
+                margin: 0;
+                display: grid;
+                place-items: center;
+                font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            h1 {
+                margin: 0;
+            }
+
+            img {
+                border-radius: 50%;
+                object-fit: cover;
+                width: 230px;
+                height: 230px;
+            }
+
+            a, a:visited {
+                text-decoration: none;
+                color: #007A33;
+            }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+            .container {
+                display: flex;
+                gap: 16px;
+            }
+
+            .spaceAbove {
+                margin-top: 16px;
+            }
+
+            @media only screen and (max-width: 600px) {
+                body {
+                    place-items: unset;
+                }
+                .container {
+                    flex-direction: column;
+                    margin: 48px auto;
+                }
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body {
+                    background: #1F1F1F;
+                    color: #D1D1D1;
+                }
+
+                a, a:visited {
+                    color: #3C8A5D
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container"> 
+            <img src="chris.jpg" alt="My face" height="300" />
             <div>
-                <a href="http://ern.dog" target="_blank">
-                    <img src="images/ernie.jpg" />
-                </a>
-                <p>ernie</p>
-            </div>
-            <div>
-                <a href="https://www.youtube.com/watch?v=6FiXyPUkJpE4" target="_blank">
-                    <img src="images/nz.jpg" />
-                </a>
-                <p>new zealand / australia</p>
-            </div>
-            <div>
-                <a href="demos/space/index.html" target="_blank">
-                    <img src="images/space.png" />
-                </a>
-                <p>space</p>
-            </div>
-            <div>
-                <a href="https://www.youtube.com/watch?v=r1ZxsareBWs" target="_blank">
-                    <img src="images/taiwan.jpg" />
-                </a>
-                <p>taiwan</p>
+                <h1>chris bubernak</h1>
+                <div>💻 + 🏀 @ <a href="https://www.nba.com/celtics/" target="_blank">boston celtics</a></div>
+                <div>🥏 stuff @ <a href="https://ufa.bubernak.com" target="_blank">here</a></div>
+                <div>🐕 stuff @ <a href="https://ern.dog" target="_blank">ern.dog</a></div>
+                <div class="spaceAbove">formerly</div>
+                <div>☁️ @ <a href="https://cloud.google.com/" target="_blank">google</a></div>
+                <div>📊 @ <a href="https://microsoft.com" target="_blank">microsoft</a></div>
             </div>
         </div>
-        <hr/>
-        <div class="footer">
-            - 2020 -  
-        </div>
-    </div>
-</body>
+    </body>
+</html>
