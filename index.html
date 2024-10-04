@@ -42,6 +42,10 @@
                 margin-top: 16px;
             }
 
+            .blur {
+                filter: url(#blur-and-scale);
+            }
+
             @media only screen and (max-width: 600px) {
                 body {
                     place-items: unset;
@@ -73,7 +77,7 @@
     </head>
     <body>
         <div class="container"> 
-            <img src="chris.jpg" alt="My face" height="300" />
+            <img src="chris.jpg" alt="My face" height="300" class="blur"/>
             <div>
                 <h1>chris bubernak</h1>
                 <div>💻 + 🏀 @ <a href="https://www.nba.com/celtics/" target="_blank">boston celtics</a></div>
@@ -84,5 +88,22 @@
                 <div>📊 @ <a href="https://microsoft.com" target="_blank">microsoft</a></div>
             </div>
         </div>
+        <svg width="0" height="0">
+            <filter
+              id="blur-and-scale"
+              y="-50%"
+              x="-50%"
+              width="200%"
+              height="200%"
+            >
+              <feGaussianBlur
+                in="SourceGraphic"
+                stdDeviation="4"
+                result="blurred"
+              />
+              <feColorMatrix type="saturate" in="blurred" values="4" />
+              <feComposite in="SourceGraphic" operator="over" />
+            </filter>
+          </svg>
     </body>
 </html>
